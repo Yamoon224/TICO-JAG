@@ -7,6 +7,7 @@ type Player = {
   poste: string;
   taille: string;
   numero: number;
+  photo?: string;
 };
 
 type Props = {
@@ -54,7 +55,7 @@ export default function PlayerCard({ player, primaryColor }: Props) {
           {player.numero}
         </span>
         <Image
-          src="/images/player-placeholder.jpg"
+          src={player.photo ?? "/images/player-placeholder.jpg"}
           alt={`${player.prenom} ${player.nom}`}
           width={120}
           height={140}

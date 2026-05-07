@@ -6,6 +6,7 @@ export type Player = {
   dateNaissance: string;
   poste: string;
   taille: string;
+  photo?: string;
 };
 
 export type TeamCategory = "Cadets" | "Juniors" | "Seniors";
@@ -115,24 +116,24 @@ const jagJuniors: Player[] = [
 ];
 
 const jagSeniors: Player[] = [
-  { id: 201, numero: 1,  prenom: "Aboubacar",    nom: "Sylla",       dateNaissance: "2001-04-15", poste: "Gardien",   taille: "1.88 m" },
-  { id: 202, numero: 2,  prenom: "Mamadou",      nom: "Kouyaté",     dateNaissance: "2000-09-22", poste: "Défenseur", taille: "1.80 m" },
-  { id: 203, numero: 3,  prenom: "Ibrahima",     nom: "Diallo",      dateNaissance: "2001-03-08", poste: "Défenseur", taille: "1.78 m" },
-  { id: 204, numero: 4,  prenom: "Lansana",      nom: "Camara",      dateNaissance: "2000-07-17", poste: "Défenseur", taille: "1.82 m" },
-  { id: 205, numero: 5,  prenom: "Mohamed",      nom: "Condé",       dateNaissance: "2001-11-30", poste: "Défenseur", taille: "1.79 m" },
-  { id: 206, numero: 6,  prenom: "Sekou",        nom: "Touré",       dateNaissance: "2000-05-14", poste: "Milieu",    taille: "1.76 m" },
-  { id: 207, numero: 7,  prenom: "Alpha",        nom: "Diallo",      dateNaissance: "2001-01-27", poste: "Milieu",    taille: "1.74 m" },
-  { id: 208, numero: 8,  prenom: "Naby",         nom: "Barry",       dateNaissance: "2000-08-05", poste: "Milieu",    taille: "1.77 m" },
-  { id: 209, numero: 9,  prenom: "Thierno",      nom: "Keita",       dateNaissance: "2001-06-19", poste: "Attaquant", taille: "1.81 m" },
-  { id: 210, numero: 10, prenom: "Moussa",       nom: "Bah",         dateNaissance: "2000-12-03", poste: "Attaquant", taille: "1.79 m" },
-  { id: 211, numero: 11, prenom: "Saliou",       nom: "Bangoura",    dateNaissance: "2001-02-21", poste: "Attaquant", taille: "1.76 m" },
-  { id: 212, numero: 12, prenom: "Ousmane",      nom: "Kouyaté",     dateNaissance: "2000-10-09", poste: "Gardien",   taille: "1.86 m" },
-  { id: 213, numero: 13, prenom: "Fode",         nom: "Sylla",       dateNaissance: "2001-07-28", poste: "Défenseur", taille: "1.80 m" },
-  { id: 214, numero: 14, prenom: "Amadou",       nom: "Diallo",      dateNaissance: "2000-04-16", poste: "Milieu",    taille: "1.77 m" },
-  { id: 215, numero: 15, prenom: "Elhadj",       nom: "Camara",      dateNaissance: "2001-09-04", poste: "Attaquant", taille: "1.78 m" },
-  { id: 216, numero: 16, prenom: "Daouda",       nom: "Barry",       dateNaissance: "2000-03-23", poste: "Défenseur", taille: "1.79 m" },
-  { id: 217, numero: 17, prenom: "Mamadi",       nom: "Condé",       dateNaissance: "2001-08-11", poste: "Milieu",    taille: "1.75 m" },
-  { id: 218, numero: 18, prenom: "Ibrahima Sory",nom: "Bah",         dateNaissance: "2000-06-30", poste: "Attaquant", taille: "1.80 m" },
+  { id: 201, numero: 1,  prenom: "Aboubacar",    nom: "Sylla",       dateNaissance: "2001-04-15", poste: "Gardien",   taille: "1.88 m", photo: "/images/players/jag/1.jpeg" },
+  { id: 202, numero: 2,  prenom: "Mamadou",      nom: "Kouyaté",     dateNaissance: "2000-09-22", poste: "Défenseur", taille: "1.80 m", photo: "/images/players/jag/2.jpeg" },
+  { id: 203, numero: 3,  prenom: "Ibrahima",     nom: "Diallo",      dateNaissance: "2001-03-08", poste: "Défenseur", taille: "1.78 m", photo: "/images/players/jag/3.jpeg" },
+  { id: 204, numero: 4,  prenom: "Lansana",      nom: "Camara",      dateNaissance: "2000-07-17", poste: "Défenseur", taille: "1.82 m", photo: "/images/players/jag/4.jpeg" },
+  { id: 205, numero: 5,  prenom: "Mohamed",      nom: "Condé",       dateNaissance: "2001-11-30", poste: "Défenseur", taille: "1.79 m", photo: "/images/players/jag/5.jpeg" },
+  { id: 206, numero: 6,  prenom: "Sekou",        nom: "Touré",       dateNaissance: "2000-05-14", poste: "Milieu",    taille: "1.76 m", photo: "/images/players/jag/6.jpeg" },
+  { id: 207, numero: 7,  prenom: "Alpha",        nom: "Diallo",      dateNaissance: "2001-01-27", poste: "Milieu",    taille: "1.74 m", photo: "/images/players/jag/7.jpeg" },
+  { id: 208, numero: 8,  prenom: "Naby",         nom: "Barry",       dateNaissance: "2000-08-05", poste: "Milieu",    taille: "1.77 m", photo: "/images/players/jag/8.jpeg" },
+  { id: 209, numero: 9,  prenom: "Thierno",      nom: "Keita",       dateNaissance: "2001-06-19", poste: "Attaquant", taille: "1.81 m", photo: "/images/players/jag/9.jpeg" },
+  { id: 210, numero: 10, prenom: "Moussa",       nom: "Bah",         dateNaissance: "2000-12-03", poste: "Attaquant", taille: "1.79 m", photo: "/images/players/jag/10.jpeg" },
+  { id: 211, numero: 11, prenom: "Saliou",       nom: "Bangoura",    dateNaissance: "2001-02-21", poste: "Attaquant", taille: "1.76 m", photo: "/images/players/jag/11.jpeg" },
+  { id: 212, numero: 12, prenom: "Ousmane",      nom: "Kouyaté",     dateNaissance: "2000-10-09", poste: "Gardien",   taille: "1.86 m", photo: "/images/players/jag/12.jpeg" },
+  { id: 213, numero: 13, prenom: "Fode",         nom: "Sylla",       dateNaissance: "2001-07-28", poste: "Défenseur", taille: "1.80 m", photo: "/images/players/jag/13.jpeg" },
+  { id: 214, numero: 14, prenom: "Amadou",       nom: "Diallo",      dateNaissance: "2000-04-16", poste: "Milieu",    taille: "1.77 m", photo: "/images/players/jag/14.jpeg" },
+  { id: 215, numero: 15, prenom: "Elhadj",       nom: "Camara",      dateNaissance: "2001-09-04", poste: "Attaquant", taille: "1.78 m", photo: "/images/players/jag/15.jpeg" },
+  { id: 216, numero: 16, prenom: "Daouda",       nom: "Barry",       dateNaissance: "2000-03-23", poste: "Défenseur", taille: "1.79 m", photo: "/images/players/jag/16.jpeg" },
+  { id: 217, numero: 17, prenom: "Mamadi",       nom: "Condé",       dateNaissance: "2001-08-11", poste: "Milieu",    taille: "1.75 m", photo: "/images/players/jag/17.jpeg" },
+  { id: 218, numero: 18, prenom: "Ibrahima Sory",nom: "Bah",         dateNaissance: "2000-06-30", poste: "Attaquant", taille: "1.80 m", photo: "/images/players/jag/18.jpeg" },
 ];
 
 // ─── Club Atlético de Colèah ─────────────────────────────────────────────────

@@ -15,12 +15,12 @@ const clubData: Record<string, { nom: string; acronyme: string; logo: string; he
 type Photo = { id: number; url: string; legende?: string; categorie?: string };
 
 const photosData: Record<string, Photo[]> = {
-  jag: Array.from({ length: 570 }, (_, i) => ({
+  jag: Array.from({ length: 586 }, (_, i) => ({
     id: i + 1,
     url: `/images/gallery/jag/${i + 1}.jpeg`,
     categorie: "JAG",
   })),
-  atletico: Array.from({ length: 25 }, (_, i) => ({
+  atletico: Array.from({ length: 58 }, (_, i) => ({
     id: i + 1,
     url: `/images/gallery/atletico/${i + 1}.jpeg`,
     categorie: "Atlético",
