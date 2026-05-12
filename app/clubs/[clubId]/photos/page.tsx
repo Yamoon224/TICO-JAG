@@ -20,7 +20,7 @@ const photosData: Record<string, Photo[]> = {
     url: `/images/gallery/jag/${i + 1}.jpeg`,
     categorie: "JAG",
   })),
-  atletico: Array.from({ length: 58 }, (_, i) => ({
+  atletico: Array.from({ length: 220 }, (_, i) => ({
     id: i + 1,
     url: `/images/gallery/atletico/${i + 1}.jpeg`,
     categorie: "Atlético",
