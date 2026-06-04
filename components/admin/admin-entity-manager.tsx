@@ -692,7 +692,7 @@ export function AdminEntityManager({ resource }: { resource: AdminResourceName }
             placeholder="ID technique"
             value={manualId}
             onChange={(e) => setManualId(e.target.value)}
-            className="w-44 border border-slate-300 rounded-md px-3 py-2 text-sm"
+            className="w-full sm:w-44 border border-slate-300 rounded-md px-3 py-2 text-sm"
           />
           {editingId !== null && <p className="text-xs text-slate-500">Edition ID: {editingId}</p>}
         </div>
@@ -726,7 +726,7 @@ export function AdminEntityManager({ resource }: { resource: AdminResourceName }
         </div>
 
         <div className="overflow-auto border border-slate-200 rounded-lg">
-          <table className="w-full text-sm">
+          <table className="w-full min-w-[540px] text-sm">
             <thead className="bg-slate-50 text-slate-600">
               <tr>
                 <th className="text-left px-3 py-2">
@@ -760,9 +760,9 @@ export function AdminEntityManager({ resource }: { resource: AdminResourceName }
                 return (
                   <tr key={id ?? `${resource}-${index}`} className="border-t border-slate-100">
                     <td className="px-3 py-2 text-slate-700">{id ?? "-"}</td>
-                    <td className="px-3 py-2 text-slate-900">{summary(record)}</td>
+                    <td className="px-3 py-2 text-slate-900 max-w-[280px] break-words">{summary(record)}</td>
                     <td className="px-3 py-2">
-                      <div className="flex gap-2">
+                      <div className="flex flex-wrap gap-2">
                         <button onClick={() => startEdit(record)} className="px-2 py-1 text-xs rounded border border-slate-300 hover:bg-slate-50">Modifier</button>
                         {id && <button onClick={() => void handleDelete(id)} className="px-2 py-1 text-xs rounded bg-red-600 text-white">Suppr.</button>}
                       </div>
@@ -781,7 +781,7 @@ export function AdminEntityManager({ resource }: { resource: AdminResourceName }
           </table>
         </div>
 
-        <div className="flex items-center justify-between mt-3 text-xs text-slate-500">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between mt-3 text-xs text-slate-500">
           <p>
             {tableRows.length} element(s) • page {currentPage}/{totalPages}
           </p>
