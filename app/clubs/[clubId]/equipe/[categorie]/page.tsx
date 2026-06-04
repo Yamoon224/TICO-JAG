@@ -3,15 +3,19 @@
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import Navbar from "@/components/Navbar";
 import PlayerCard from "@/components/PlayerCard";
-import { getClub } from "@/lib/data";
+import {
+  fetchClubBySlug,
+  fetchClubPlayersByCategory,
+  type ClubApiModel,
+  type TeamPlayerCardModel,
+} from "@/lib/api";
 import { useLocale } from "@/lib/locale-context";
-import type { TeamCategory } from "@/lib/data";
 import { Search, X } from "lucide-react";
 
-const CAT_MAP: Record<string, TeamCategory> = {
+const CAT_MAP: Record<string, "Cadets" | "Juniors" | "Seniors"> = {
   cadets: "Cadets",
   juniors: "Juniors",
   seniors: "Seniors",
@@ -21,13 +25,66 @@ const POSTES_FR = ["Tous", "Gardien", "Défenseur", "Milieu", "Attaquant"] as co
 
 export default function TeamPage() {
   const params = useParams<{ clubId: string; categorie: string }>();
-  const { t, locale } = useLocale();
-  const club = getClub(params.clubId);
+  const { t } = useLocale();
   const catKey = params.categorie?.toLowerCase();
   const category = CAT_MAP[catKey];
 
   const [search, setSearch] = useState("");
   const [posteFilter, setPosteFilter] = useState<string>("Tous");
+  const [club, setClub] = useState<ClubApiModel | null>(null);
+  const [players, setPlayers] = useState<TeamPlayerCardModel[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let mounted = true;
+
+    async function run() {
+      if (!category) {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        setLoading(true);
+        setError(null);
+        const [clubResult, playersResult] = await Promise.all([
+          fetchClubBySlug(params.clubId),
+          fetchClubPlayersByCategory(params.clubId, catKey ?? ""),
+        ]);
+
+        if (mounted) {
+          setClub(clubResult);
+          setPlayers(playersResult);
+        }
+      } catch {
+        if (mounted) {
+          setError("Impossible de charger l'effectif.");
+        }
+      } finally {
+        if (mounted) {
+          setLoading(false);
+        }
+      }
+    }
+
+    run();
+
+    return () => {
+      mounted = false;
+    };
+  }, [params.clubId, catKey, category]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex flex-col">
+        <Navbar />
+        <div className="flex-1 flex items-center justify-center px-4">
+          <p className="text-muted-foreground text-sm">Chargement de l&apos;équipe...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (!club || !category) {
     return (
@@ -36,6 +93,7 @@ export default function TeamPage() {
         <div className="flex-1 flex items-center justify-center px-4">
           <div className="text-center">
             <p className="text-xl font-black text-foreground mb-2">Page introuvable</p>
+            {error && <p className="text-xs text-muted-foreground mb-2">{error}</p>}
             <Link href="/" className="text-sm font-semibold hover:underline" style={{ color: "#CC0000" }}>
               Retour à l&apos;accueil
             </Link>
@@ -44,8 +102,6 @@ export default function TeamPage() {
       </div>
     );
   }
-
-  const players = club.equipes[category];
 
   const filtered = useMemo(() => {
     return players.filter((p) => {
@@ -57,7 +113,7 @@ export default function TeamPage() {
     });
   }, [players, search, posteFilter]);
 
-  const categories: TeamCategory[] = ["Cadets", "Juniors", "Seniors"];
+  const categories: Array<"Cadets" | "Juniors" | "Seniors"> = ["Cadets", "Juniors", "Seniors"];
   const hasFilters = search !== "" || posteFilter !== "Tous";
 
   return (
@@ -66,20 +122,20 @@ export default function TeamPage() {
 
       {/* ── Club mini-header ──────────────────────────────── */}
       <div className="relative h-40 sm:h-52 overflow-hidden">
-        <Image src={club.hero} alt={club.nom} fill className="object-cover" priority />
+        <Image src={club.hero || "/images/jag-hero.png"} alt={club.name} fill className="object-cover" priority />
         <div className="absolute inset-0 bg-black/60" />
         <div className="absolute inset-0 flex items-center px-4 sm:px-8 gap-4">
-          <Link href={`/clubs/${club.id}`} className="shrink-0">
+          <Link href={`/clubs/${club.slug}`} className="shrink-0">
             <Image
-              src={club.logo}
-              alt={club.nom}
+              src={club.logo || "/images/jag-logo.png"}
+              alt={club.name}
               width={56}
               height={56}
               className="rounded-full border-2 border-white shadow-lg object-cover"
             />
           </Link>
           <div className="min-w-0">
-            <p className="text-white/60 text-xs truncate">{club.nom}</p>
+            <p className="text-white/60 text-xs truncate">{club.name}</p>
             <h1 className="text-white font-black text-2xl sm:text-4xl leading-tight">
               {t.categories[category]}
             </h1>
@@ -91,11 +147,11 @@ export default function TeamPage() {
       </div>
 
       {/* ── Category tabs ─────────────────────────────────── */}
-      <div className="flex" style={{ backgroundColor: club.couleurPrimaire }}>
+      <div className="flex" style={{ backgroundColor: club.primary_color || "#CC0000" }}>
         {categories.map((cat) => (
           <Link
             key={cat}
-            href={`/clubs/${club.id}/equipe/${cat.toLowerCase()}`}
+            href={`/clubs/${club.slug}/equipe/${cat.toLowerCase()}`}
             className={`flex-1 py-2.5 text-center text-xs sm:text-sm font-semibold transition-colors border-b-2 ${
               cat === category
                 ? "border-white text-white"
@@ -145,7 +201,7 @@ export default function TeamPage() {
                   }`}
                   style={
                     isActive
-                      ? { backgroundColor: club.couleurPrimaire, color: "#fff", borderColor: club.couleurPrimaire }
+                      ? { backgroundColor: club.primary_color || "#CC0000", color: "#fff", borderColor: club.primary_color || "#CC0000" }
                       : {}
                   }
                 >
@@ -167,7 +223,7 @@ export default function TeamPage() {
         {filtered.length > 0 ? (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 md:gap-4">
             {filtered.map((player) => (
-              <PlayerCard key={player.id} player={player} primaryColor={club.couleurPrimaire} />
+              <PlayerCard key={player.id} player={player} primaryColor={club.primary_color || "#CC0000"} />
             ))}
           </div>
         ) : (
@@ -176,7 +232,7 @@ export default function TeamPage() {
             <button
               onClick={() => { setSearch(""); setPosteFilter("Tous"); }}
               className="text-xs font-semibold hover:underline"
-              style={{ color: club.couleurPrimaire }}
+              style={{ color: club.primary_color || "#CC0000" }}
             >
               {t.team.resetFilters}
             </button>
@@ -186,8 +242,8 @@ export default function TeamPage() {
 
       {/* ── Footer ───────────────────────────────────────── */}
       <footer className="border-t border-border bg-muted/30 py-8 text-center text-muted-foreground text-sm">
-        <p className="font-semibold text-foreground mb-1">{club.nom}</p>
-        <p>{club.ville}</p>
+        <p className="font-semibold text-foreground mb-1">{club.name}</p>
+        <p>{club.city || "-"}</p>
       </footer>
     </div>
   );

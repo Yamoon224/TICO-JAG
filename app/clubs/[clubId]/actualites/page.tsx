@@ -1,56 +1,16 @@
 "use client";
 
-import { use } from "react";
+import { use, useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
+import { fetchClubArticles, type NewsArticle } from "@/lib/api";
 import { useLocale } from "@/lib/locale-context";
 import { ChevronLeft, CalendarDays } from "lucide-react";
 
 const clubData: Record<string, { nom: string; acronyme: string; logo: string; hero: string; color: string; colorDark: string }> = {
   jag: { nom: "Jaguar Académie Guinée", acronyme: "JAG", logo: "/images/jag-logo.png", hero: "/images/jag-hero.png", color: "#CC0000", colorDark: "#990000" },
   atletico: { nom: "Club Atlético de Colèah", acronyme: "Atlético", logo: "/images/atletico-logo.png", hero: "/images/atletico-hero.png", color: "#F5B800", colorDark: "#C9950A" },
-};
-
-type Article = { id: number; titre: string; contenu: string; image?: string; datePublication: string; categorie: string };
-
-const actualitesData: Record<string, Article[]> = {
-  jag: [
-    {
-      id: 1,
-      titre: "La JAG brille à la Ligue des Académies",
-      contenu: "La Jaguar Académie Guinée réalise un début de saison remarquable avec trois victoires en cinq matchs. L'équipe Juniors se positionne à la 3e place du classement général, démontrant la qualité de la formation mise en place depuis la fondation du club.",
-      image: "/images/jag-hero.png",
-      datePublication: "2025-04-15",
-      categorie: "Sports",
-    },
-    {
-      id: 2,
-      titre: "Nouveau maillot domicile 25/26 dévoilé",
-      contenu: "La JAG a officiellement présenté son nouveau maillot domicile pour la saison 2025/2026. Dans les couleurs traditionnelles or et noir, ce maillot représente l'identité et les valeurs du club : excellence, discipline et fierté guinéenne.",
-      image: "/images/jag-logo.png",
-      datePublication: "2025-04-10",
-      categorie: "Club",
-    },
-  ],
-  atletico: [
-    {
-      id: 3,
-      titre: "Atlético de Colèah : bilan du premier tour",
-      contenu: "Au terme du premier tour du Championnat de Guinée, l'Atlético de Colèah occupe la 4e position avec 14 points. L'équipe Seniors a montré de belles choses, notamment une victoire 3-2 face à l'AS Kaloum Star lors d'un match disputé.",
-      image: "/images/atletico-hero.png",
-      datePublication: "2025-04-18",
-      categorie: "Sports",
-    },
-    {
-      id: 4,
-      titre: "Refondation 2025 : notre projet sportif",
-      contenu: "Depuis sa refondation en 2025 par le président Touré Moussa, l'Atlético de Colèah s'est doté d'une structure complète avec des équipes masculines et féminines. Le club entend renouer avec ses années de gloire, lui qui fut vice-champion de Guinée à trois reprises.",
-      image: "/images/atletico-logo.png",
-      datePublication: "2025-04-05",
-      categorie: "Club",
-    },
-  ],
 };
 
 function formatDate(dateStr: string, locale: string) {
@@ -61,7 +21,35 @@ export default function ActualitesPage({ params }: { params: Promise<{ clubId: s
   const { clubId } = use(params);
   const { locale } = useLocale();
   const club = clubData[clubId] ?? clubData.jag;
-  const articles = [...(actualitesData[clubId] ?? [])].sort((a, b) => b.datePublication.localeCompare(a.datePublication));
+  const [articles, setArticles] = useState<NewsArticle[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let active = true;
+
+    fetchClubArticles(clubId)
+      .then((items) => {
+        if (active) {
+          setArticles(items);
+        }
+      })
+      .catch(() => {
+        if (active) {
+          setArticles([]);
+        }
+      })
+      .finally(() => {
+        if (active) {
+          setLoading(false);
+        }
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [clubId]);
+
+  const orderedArticles = [...articles].sort((a, b) => b.datePublication.localeCompare(a.datePublication));
 
   return (
     <div className="min-h-screen bg-background">
@@ -85,8 +73,18 @@ export default function ActualitesPage({ params }: { params: Promise<{ clubId: s
       </div>
 
       <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
+        {loading && orderedArticles.length === 0 && (
+          <p className="text-center text-muted-foreground py-12">Chargement...</p>
+        )}
+
+        {!loading && orderedArticles.length === 0 && (
+          <p className="text-center text-muted-foreground py-12">
+            {locale === "fr" ? "Aucune actualité disponible." : "No news available."}
+          </p>
+        )}
+
         <div className="grid sm:grid-cols-2 gap-5">
-          {articles.map((a, i) => (
+          {orderedArticles.map((a, i) => (
             <article key={a.id} className={`bg-card border border-border rounded-sm overflow-hidden hover:shadow-md transition-shadow ${
               i === 0 ? "sm:col-span-2" : ""
             }`}>

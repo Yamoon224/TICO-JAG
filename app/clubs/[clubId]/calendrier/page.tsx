@@ -1,9 +1,10 @@
 "use client";
 
-import { use, useState } from "react";
+import { use, useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
+import { fetchClubCalendar, type ClubMatch as ClubMatchApi } from "@/lib/api";
 import { useLocale } from "@/lib/locale-context";
 import { CalendarDays, ChevronLeft, MapPin, ArrowRight } from "lucide-react";
 
@@ -12,41 +13,7 @@ const clubData: Record<string, { nom: string; acronyme: string; logo: string; he
   atletico: { nom: "Club Atlético de Colèah", acronyme: "Atlético", logo: "/images/atletico-logo.png", hero: "/images/atletico-hero.png", color: "#F5B800", colorDark: "#C9950A" },
 };
 
-type Match = {
-  id: number;
-  date: string;
-  heure?: string;
-  journee?: string;
-  adversaire: string;
-  competition: string;
-  lieu: "Domicile" | "Extérieur";
-  stade?: string;
-  categorie: "Cadets" | "Juniors" | "Seniors";
-};
-
-const calendrierData: Record<string, Match[]> = {
-  jag: [
-    { id: 101, date: "2025-10-31", heure: "13:30", journee: "J1", adversaire: "A. Louviere de Guinee", competition: "LIGUA", lieu: "Extérieur", stade: "Stade de Coleah", categorie: "Seniors" },
-    { id: 102, date: "2025-11-06", heure: "10:00", journee: "J2", adversaire: "Academie Diamond", competition: "LIGUA", lieu: "Domicile", stade: "Stade de Coleah", categorie: "Seniors" },
-    { id: 103, date: "2025-11-22", heure: "15:00", journee: "J4", adversaire: "AFC Sampya", competition: "LIGUA", lieu: "Domicile", stade: "Stade de Coleah", categorie: "Seniors" },
-    { id: 104, date: "2025-11-26", heure: "10:30", journee: "J5", adversaire: "Sosso Academie", competition: "LIGUA", lieu: "Extérieur", stade: "Stade de Coleah", categorie: "Seniors" },
-    { id: 105, date: "2025-12-05", heure: "10:30", journee: "J6", adversaire: "Academie Sabou Fac", competition: "LIGUA", lieu: "Extérieur", stade: "Stade de Coleah", categorie: "Seniors" },
-    { id: 106, date: "2025-12-17", heure: "12:00", journee: "J8", adversaire: "Academie GFI", competition: "LIGUA", lieu: "Extérieur", stade: "Stade de Coleah", categorie: "Seniors" },
-    { id: 107, date: "2026-01-09", heure: "12:00", journee: "J9", adversaire: "A. Coleah United", competition: "LIGUA", lieu: "Domicile", stade: "Stade de Coleah", categorie: "Seniors" },
-    { id: 108, date: "2026-01-21", heure: "11:30", journee: "J11", adversaire: "A. Sainte Marie", competition: "LIGUA", lieu: "Domicile", stade: "Stade de Coleah", categorie: "Seniors" },
-    { id: 109, date: "2026-02-01", heure: "13:30", journee: "J12", adversaire: "Academie Siak Foot", competition: "LIGUA", lieu: "Domicile", stade: "Stade de Coleah", categorie: "Seniors" },
-    { id: 110, date: "2026-02-05", heure: "13:00", journee: "J13", adversaire: "Academie Twinstars", competition: "LIGUA", lieu: "Extérieur", stade: "Stade de Coleah", categorie: "Seniors" },
-    { id: 111, date: "2026-04-18", heure: "13:30", journee: "J15", adversaire: "Academie Siak Foot", competition: "LIGUA", lieu: "Extérieur", stade: "Stade de Coleah", categorie: "Seniors" },
-    { id: 112, date: "2026-04-25", heure: "13:00", journee: "J16", adversaire: "A. Sainte Marie", competition: "LIGUA", lieu: "Extérieur", stade: "Stade de Coleah", categorie: "Seniors" },
-    { id: 113, date: "2026-05-06", heure: "10:30", journee: "J18", adversaire: "A. Coleah United", competition: "LIGUA", lieu: "Extérieur", stade: "Stade de Coleah", categorie: "Seniors" },
-    { id: 114, date: "2026-05-14", heure: "12:00", journee: "J19", adversaire: "Academie GFI", competition: "LIGUA", lieu: "Domicile", stade: "Stade de Coleah", categorie: "Seniors" },
-  ],
-  atletico: [
-    { id: 7, date: "2025-05-11", adversaire: "Kaloum Star", competition: "Championnat Guinée", lieu: "Domicile", stade: "Stade Général Lansana Conté", categorie: "Seniors" },
-    { id: 8, date: "2025-05-18", adversaire: "Hafia FC", competition: "Championnat Guinée", lieu: "Extérieur", categorie: "Juniors" },
-    { id: 9, date: "2025-05-25", adversaire: "Horoya AC", competition: "Coupe de Guinée", lieu: "Domicile", stade: "Stade de Colèah", categorie: "Cadets" },
-  ],
-};
+type Match = ClubMatchApi;
 
 const CATS = ["Tous", "Cadets", "Juniors", "Seniors"] as const;
 type CatFilter = typeof CATS[number];
@@ -60,10 +27,38 @@ export default function CalendrierPage({ params }: { params: Promise<{ clubId: s
   const { clubId } = use(params);
   const { locale } = useLocale();
   const club = clubData[clubId] ?? clubData.jag;
-  const matches = [...(calendrierData[clubId] ?? [])].sort((a, b) => a.date.localeCompare(b.date));
+  const [matches, setMatches] = useState<Match[]>([]);
+  const [loading, setLoading] = useState(true);
   const [cat, setCat] = useState<CatFilter>("Tous");
 
-  const filtered = cat === "Tous" ? matches : matches.filter((m) => m.categorie === cat);
+  useEffect(() => {
+    let active = true;
+
+    fetchClubCalendar(clubId)
+      .then((items) => {
+        if (active) {
+          setMatches(items);
+        }
+      })
+      .catch(() => {
+        if (active) {
+          setMatches([]);
+        }
+      })
+      .finally(() => {
+        if (active) {
+          setLoading(false);
+        }
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [clubId]);
+
+  const orderedMatches = [...matches].sort((a, b) => a.date.localeCompare(b.date));
+
+  const filtered = cat === "Tous" ? orderedMatches : orderedMatches.filter((m) => m.categorie === cat);
 
   return (
     <div className="min-h-screen bg-background">
@@ -102,6 +97,10 @@ export default function CalendrierPage({ params }: { params: Promise<{ clubId: s
       </div>
 
       <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
+        {loading && filtered.length === 0 && (
+          <p className="text-center text-muted-foreground py-12">Chargement...</p>
+        )}
+
         {filtered.length === 0 ? (
           <p className="text-center text-muted-foreground py-16">{locale === "fr" ? "Aucun match à venir." : "No upcoming matches."}</p>
         ) : (

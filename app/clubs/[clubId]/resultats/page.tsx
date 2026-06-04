@@ -1,9 +1,10 @@
 "use client";
 
-import { use, useState } from "react";
+import { use, useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
+import { fetchClubResults, type ClubMatch as ClubMatchApi } from "@/lib/api";
 import { useLocale } from "@/lib/locale-context";
 import { ChevronLeft, MapPin } from "lucide-react";
 
@@ -12,20 +13,7 @@ const clubData: Record<string, { nom: string; acronyme: string; logo: string; he
   atletico: { nom: "Club Atlético de Colèah", acronyme: "Atlético", logo: "/images/atletico-logo.png", hero: "/images/atletico-hero.png", color: "#F5B800", colorDark: "#C9950A" },
 };
 
-type Resultat = { id: number; date: string; adversaire: string; competition: string; lieu: "Domicile" | "Extérieur"; scoreClub: number; scoreAdv: number; categorie: "Cadets" | "Juniors" | "Seniors" };
-
-const resultatsData: Record<string, Resultat[]> = {
-  jag: [
-    { id: 4, date: "2025-04-05", adversaire: "Hafia FC Academy", competition: "Ligue des Académies", lieu: "Extérieur", scoreClub: 2, scoreAdv: 1, categorie: "Juniors" },
-    { id: 5, date: "2025-04-12", adversaire: "Satellite FC", competition: "Ligue des Académies", lieu: "Domicile", scoreClub: 3, scoreAdv: 0, categorie: "Cadets" },
-    { id: 6, date: "2025-04-19", adversaire: "AS Bananas", competition: "Championnat local", lieu: "Domicile", scoreClub: 1, scoreAdv: 1, categorie: "Seniors" },
-  ],
-  atletico: [
-    { id: 10, date: "2025-04-06", adversaire: "AS Kaloum Star", competition: "Championnat Guinée", lieu: "Extérieur", scoreClub: 3, scoreAdv: 2, categorie: "Seniors" },
-    { id: 11, date: "2025-04-13", adversaire: "Satellite FC", competition: "Championnat Guinée", lieu: "Domicile", scoreClub: 2, scoreAdv: 2, categorie: "Juniors" },
-    { id: 12, date: "2025-04-20", adversaire: "FC Kakimbo", competition: "Coupe de Guinée", lieu: "Domicile", scoreClub: 4, scoreAdv: 1, categorie: "Cadets" },
-  ],
-};
+type Resultat = ClubMatchApi;
 
 const CATS = ["Tous", "Cadets", "Juniors", "Seniors"] as const;
 type CatFilter = typeof CATS[number];
@@ -44,10 +32,38 @@ export default function ResultatsPage({ params }: { params: Promise<{ clubId: st
   const { clubId } = use(params);
   const { locale } = useLocale();
   const club = clubData[clubId] ?? clubData.jag;
-  const resultats = [...(resultatsData[clubId] ?? [])].sort((a, b) => b.date.localeCompare(a.date));
+  const [resultats, setResultats] = useState<Resultat[]>([]);
+  const [loading, setLoading] = useState(true);
   const [cat, setCat] = useState<CatFilter>("Tous");
 
-  const filtered = cat === "Tous" ? resultats : resultats.filter((r) => r.categorie === cat);
+  useEffect(() => {
+    let active = true;
+
+    fetchClubResults(clubId)
+      .then((items) => {
+        if (active) {
+          setResultats(items);
+        }
+      })
+      .catch(() => {
+        if (active) {
+          setResultats([]);
+        }
+      })
+      .finally(() => {
+        if (active) {
+          setLoading(false);
+        }
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [clubId]);
+
+  const orderedResults = [...resultats].sort((a, b) => b.date.localeCompare(a.date));
+
+  const filtered = cat === "Tous" ? orderedResults : orderedResults.filter((r) => r.categorie === cat);
 
   return (
     <div className="min-h-screen bg-background">
@@ -86,12 +102,18 @@ export default function ResultatsPage({ params }: { params: Promise<{ clubId: st
       </div>
 
       <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
+        {loading && filtered.length === 0 && (
+          <p className="text-center text-muted-foreground py-12">Chargement...</p>
+        )}
+
         {filtered.length === 0 ? (
           <p className="text-center text-muted-foreground py-16">{locale === "fr" ? "Aucun résultat." : "No results yet."}</p>
         ) : (
           <div className="flex flex-col gap-4">
             {filtered.map((r) => {
-              const res = getResult(r.scoreClub, r.scoreAdv);
+              const scoreClub = r.scoreClub ?? 0;
+              const scoreAdv = r.scoreAdv ?? 0;
+              const res = getResult(scoreClub, scoreAdv);
               return (
                 <div key={r.id} className="bg-card border border-border rounded-sm p-5 flex flex-col sm:flex-row sm:items-center gap-4">
                   {/* Result badge */}
@@ -106,9 +128,9 @@ export default function ResultatsPage({ params }: { params: Promise<{ clubId: st
 
                   {/* Score */}
                   <div className="flex items-center gap-3 shrink-0">
-                    <span className="font-black text-3xl text-foreground tabular-nums">{r.scoreClub}</span>
+                    <span className="font-black text-3xl text-foreground tabular-nums">{scoreClub}</span>
                     <span className="text-muted-foreground font-bold">—</span>
-                    <span className="font-black text-3xl text-foreground tabular-nums">{r.scoreAdv}</span>
+                    <span className="font-black text-3xl text-foreground tabular-nums">{scoreAdv}</span>
                   </div>
 
                   {/* Info */}

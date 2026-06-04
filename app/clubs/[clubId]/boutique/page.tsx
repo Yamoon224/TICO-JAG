@@ -1,9 +1,10 @@
 "use client";
 
-import { use } from "react";
+import { use, useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
+import { fetchClubProducts, type ShopProduct } from "@/lib/api";
 import { useLocale } from "@/lib/locale-context";
 import { ShoppingBag, Truck, RotateCcw, ShieldCheck, ChevronLeft, Star } from "lucide-react";
 
@@ -33,46 +34,40 @@ const clubData: Record<string, {
   },
 };
 
-const shopProducts: Record<string, {
-  id: number;
-  name: { fr: string; en: string };
-  category: "jerseys" | "accessories" | "bags";
-  price: string;
-  image: string;
-  isNew?: boolean;
-  isSale?: boolean;
-  oldPrice?: string;
-  rating: number;
-  reviews: number;
-}[]> = {
-  jag: [
-    { id: 1, name: { fr: "Maillot domicile 25/26", en: "Home jersey 25/26" }, category: "jerseys", price: "150 000 GNF", image: "/images/shop/jag-jersey.jpg", isNew: true, rating: 5, reviews: 12 },
-    { id: 2, name: { fr: "Maillot extérieur 25/26", en: "Away jersey 25/26" }, category: "jerseys", price: "150 000 GNF", image: "/images/shop/jag-jersey-away.jpg", rating: 4, reviews: 7 },
-    { id: 3, name: { fr: "Écharpe officielle JAG", en: "Official JAG scarf" }, category: "accessories", price: "45 000 GNF", image: "/images/shop/jag-scarf.jpg", isSale: true, oldPrice: "60 000 GNF", rating: 5, reviews: 23 },
-    { id: 4, name: { fr: "Casquette JAG", en: "JAG cap" }, category: "accessories", price: "35 000 GNF", image: "/images/shop/jag-cap.jpg", rating: 4, reviews: 9 },
-    { id: 5, name: { fr: "Sac de sport JAG", en: "JAG sports bag" }, category: "bags", price: "90 000 GNF", image: "/images/shop/jag-bag.jpg", isNew: true, rating: 5, reviews: 4 },
-    { id: 6, name: { fr: "Écharpe supporter", en: "Supporter scarf" }, category: "accessories", price: "40 000 GNF", image: "/images/shop/jag-scarf.jpg", isSale: true, oldPrice: "55 000 GNF", rating: 4, reviews: 16 },
-  ],
-  atletico: [
-    { id: 1, name: { fr: "Maillot domicile 25/26", en: "Home jersey 25/26" }, category: "jerseys", price: "150 000 GNF", image: "/images/shop/atletico-jersey.jpg", isNew: true, rating: 5, reviews: 18 },
-    { id: 2, name: { fr: "Maillot extérieur 25/26", en: "Away jersey 25/26" }, category: "jerseys", price: "150 000 GNF", image: "/images/shop/atletico-jersey.jpg", rating: 4, reviews: 6 },
-    { id: 3, name: { fr: "Écharpe officielle Atlético", en: "Official Atlético scarf" }, category: "accessories", price: "45 000 GNF", image: "/images/shop/atletico-scarf.jpg", isSale: true, oldPrice: "60 000 GNF", rating: 5, reviews: 29 },
-    { id: 4, name: { fr: "Casquette Atlético", en: "Atlético cap" }, category: "accessories", price: "35 000 GNF", image: "/images/shop/atletico-cap.jpg", rating: 4, reviews: 11 },
-    { id: 5, name: { fr: "Sac de sport Atlético", en: "Atlético sports bag" }, category: "bags", price: "90 000 GNF", image: "/images/shop/jag-bag.jpg", isNew: true, rating: 5, reviews: 3 },
-    { id: 6, name: { fr: "Écharpe supporter", en: "Supporter scarf" }, category: "accessories", price: "40 000 GNF", image: "/images/shop/atletico-scarf.jpg", isSale: true, oldPrice: "55 000 GNF", rating: 4, reviews: 20 },
-  ],
-};
-
 type CategoryFilter = "all" | "jerseys" | "accessories" | "bags";
-
-import { useState } from "react";
 
 export default function BoutiquePage({ params }: { params: Promise<{ clubId: string }> }) {
   const { clubId } = use(params);
   const { locale, t } = useLocale();
   const club = clubData[clubId] ?? clubData.jag;
-  const products = shopProducts[clubId] ?? shopProducts.jag;
+  const [products, setProducts] = useState<ShopProduct[]>([]);
+  const [loading, setLoading] = useState(true);
   const [activeCategory, setActiveCategory] = useState<CategoryFilter>("all");
+
+  useEffect(() => {
+    let active = true;
+
+    fetchClubProducts(clubId)
+      .then((items) => {
+        if (active) {
+          setProducts(items);
+        }
+      })
+      .catch(() => {
+        if (active) {
+          setProducts([]);
+        }
+      })
+      .finally(() => {
+        if (active) {
+          setLoading(false);
+        }
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [clubId]);
 
   const filterLabels: Record<CategoryFilter, string> = {
     all: t.shop.allProducts,
@@ -138,6 +133,10 @@ export default function BoutiquePage({ params }: { params: Promise<{ clubId: str
         </div>
 
         {/* Products grid */}
+        {loading && filtered.length === 0 && (
+          <p className="text-center text-muted-foreground py-12">Chargement...</p>
+        )}
+
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5">
           {filtered.map((product) => (
             <div

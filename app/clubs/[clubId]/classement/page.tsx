@@ -1,9 +1,10 @@
 "use client";
 
-import { use, useState } from "react";
+import { use, useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
+import { fetchClubStandings, type StandingEntry, type StandingGroup } from "@/lib/api";
 import { useLocale } from "@/lib/locale-context";
 import { ChevronLeft } from "lucide-react";
 
@@ -12,93 +13,45 @@ const clubData: Record<string, { nom: string; acronyme: string; logo: string; he
     atletico: { nom: "Club Atlético de Colèah", acronyme: "Atlético", logo: "/images/atletico-logo.png", hero: "/images/atletico-hero.png", color: "#F5B800", colorDark: "#C9950A" },
 };
 
-type Entree = {
-    position: number;
-    equipe: string;
-    joues?: number;
-    victoires?: number;
-    nuls?: number;
-    defaites?: number;
-    butsPour?: number;
-    butsContre?: number;
-    gd?: number;
-    points: number;
-    isClub?: boolean;
-};
-type Groupe = { competition: string; categorie: string; saison: string; entrees: Entree[] };
-
-const jagJournees: Array<{ journee: number; position: number; mj: number; gd: number; pts: number }> = [
-    { journee: 1, position: 3, mj: 1, gd: 2, pts: 3 },
-    { journee: 2, position: 7, mj: 2, gd: 1, pts: 3 },
-    { journee: 4, position: 6, mj: 4, gd: 3, pts: 6 },
-    { journee: 5, position: 9, mj: 5, gd: 2, pts: 6 },
-    { journee: 6, position: 8, mj: 6, gd: 3, pts: 9 },
-    { journee: 7, position: 10, mj: 7, gd: 0, pts: 9 },
-    { journee: 8, position: 10, mj: 8, gd: 0, pts: 10 },
-    { journee: 9, position: 9, mj: 9, gd: -1, pts: 10 },
-    { journee: 10, position: 7, mj: 10, gd: 0, pts: 13 },
-    { journee: 11, position: 6, mj: 11, gd: 2, pts: 16 },
-    { journee: 12, position: 6, mj: 12, gd: 2, pts: 17 },
-    { journee: 13, position: 7, mj: 13, gd: 2, pts: 18 },
-    { journee: 14, position: 7, mj: 14, gd: 2, pts: 19 },
-    { journee: 16, position: 7, mj: 16, gd: 2, pts: 22 },
-    { journee: 18, position: 7, mj: 18, gd: 3, pts: 26 },
-];
-
-const classementsData: Record<string, Groupe[]> = {
-    jag: [
-        ...jagJournees.map((j) => ({
-            competition: "Ligue Guineenne des Academies",
-            categorie: `Journee ${j.journee}`,
-            saison: "2025-2026",
-            entrees: [
-                {
-                    position: j.position,
-                    equipe: "Academie Jaguar",
-                    joues: j.mj,
-                    gd: j.gd,
-                    points: j.pts,
-                    isClub: true,
-                },
-            ],
-        })),
-    ],
-    atletico: [
-        {
-            competition: "Championnat Guinée", categorie: "Seniors", saison: "2025",
-            entrees: [
-                { position: 1, equipe: "Horoya AC", joues: 8, victoires: 7, nuls: 0, defaites: 1, butsPour: 22, butsContre: 6, points: 21 },
-                { position: 2, equipe: "Hafia FC", joues: 8, victoires: 6, nuls: 1, defaites: 1, butsPour: 18, butsContre: 8, points: 19 },
-                { position: 3, equipe: "AS Kaloum Star", joues: 8, victoires: 5, nuls: 0, defaites: 3, butsPour: 15, butsContre: 11, points: 15 },
-                { position: 4, equipe: "Atlético de Colèah", joues: 8, victoires: 4, nuls: 2, defaites: 2, butsPour: 14, butsContre: 10, points: 14, isClub: true },
-                { position: 5, equipe: "Satellite FC", joues: 8, victoires: 2, nuls: 1, defaites: 5, butsPour: 9, butsContre: 16, points: 7 },
-            ],
-        },
-        {
-            competition: "Championnat Guinée", categorie: "Juniors", saison: "2025",
-            entrees: [
-                { position: 1, equipe: "Horoya AC Academy", joues: 8, victoires: 6, nuls: 2, defaites: 0, butsPour: 20, butsContre: 5, points: 20 },
-                { position: 2, equipe: "Atlético de Colèah", joues: 8, victoires: 5, nuls: 2, defaites: 1, butsPour: 15, butsContre: 7, points: 17, isClub: true },
-                { position: 3, equipe: "FC Kakimbo", joues: 8, victoires: 4, nuls: 1, defaites: 3, butsPour: 12, butsContre: 10, points: 13 },
-                { position: 4, equipe: "Hafia FC", joues: 8, victoires: 2, nuls: 1, defaites: 5, butsPour: 8, butsContre: 15, points: 7 },
-                { position: 5, equipe: "Satellite FC", joues: 8, victoires: 0, nuls: 0, defaites: 8, butsPour: 3, butsContre: 21, points: 0 },
-            ],
-        },
-    ],
-};
-
 export default function ClassementPage({ params }: { params: Promise<{ clubId: string }> }) {
     const { clubId } = use(params);
     const { locale } = useLocale();
     const club = clubData[clubId] ?? clubData.jag;
-    const groupes = classementsData[clubId] ?? [];
+    const [groupes, setGroupes] = useState<StandingGroup[]>([]);
+    const [loading, setLoading] = useState(true);
     const [activeIdx, setActiveIdx] = useState(0);
     const groupe = groupes[activeIdx];
+
+    useEffect(() => {
+        let active = true;
+
+        fetchClubStandings(clubId)
+            .then((items) => {
+                if (active) {
+                    setGroupes(items);
+                    setActiveIdx(0);
+                }
+            })
+            .catch(() => {
+                if (active) {
+                    setGroupes([]);
+                }
+            })
+            .finally(() => {
+                if (active) {
+                    setLoading(false);
+                }
+            });
+
+        return () => {
+            active = false;
+        };
+    }, [clubId]);
 
     const th = "text-xs font-semibold text-muted-foreground px-2 py-2 text-center";
     const td = "text-sm text-center px-2 py-3";
     const renderStat = (value?: number) => (typeof value === "number" ? value : "-");
-    const renderGd = (e: Entree) => {
+    const renderGd = (e: StandingEntry) => {
         if (typeof e.gd === "number") return e.gd;
         if (typeof e.butsPour === "number" && typeof e.butsContre === "number") return e.butsPour - e.butsContre;
         return "-";
@@ -142,6 +95,10 @@ export default function ClassementPage({ params }: { params: Promise<{ clubId: s
             )}
 
             <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
+                {loading && !groupe && (
+                    <p className="text-center text-muted-foreground py-12">Chargement...</p>
+                )}
+
                 {groupe && (
                     <>
                         <div className="mb-4 flex flex-wrap gap-2 items-baseline">

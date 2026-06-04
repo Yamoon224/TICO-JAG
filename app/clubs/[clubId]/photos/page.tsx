@@ -1,9 +1,10 @@
 "use client";
 
-import { use, useState } from "react";
+import { use, useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
+import { fetchClubGallery, type ClubGalleryPhoto } from "@/lib/api";
 import { useLocale } from "@/lib/locale-context";
 import { ChevronLeft, X } from "lucide-react";
 
@@ -12,32 +13,46 @@ const clubData: Record<string, { nom: string; acronyme: string; logo: string; he
   atletico: { nom: "Club Atlético de Colèah", acronyme: "Atlético", logo: "/images/atletico-logo.png", hero: "/images/atletico-hero.png", color: "#F5B800", colorDark: "#C9950A" },
 };
 
-type Photo = { id: number; url: string; legende?: string; categorie?: string };
-
-const photosData: Record<string, Photo[]> = {
-  jag: Array.from({ length: 586 }, (_, i) => ({
-    id: i + 1,
-    url: `/images/gallery/jag/${i + 1}.jpeg`,
-    categorie: "JAG",
-  })),
-  atletico: Array.from({ length: 220 }, (_, i) => ({
-    id: i + 1,
-    url: `/images/gallery/atletico/${i + 1}.jpeg`,
-    categorie: "Atlético",
-  })),
-};
-
 const PAGE_SIZE = 9;
 
 export default function PhotosPage({ params }: { params: Promise<{ clubId: string }> }) {
   const { clubId } = use(params);
   const { locale } = useLocale();
   const club = clubData[clubId] ?? clubData.jag;
-  const photos = photosData[clubId] ?? [];
-  const [lightbox, setLightbox] = useState<Photo | null>(null);
+  const [photos, setPhotos] = useState<ClubGalleryPhoto[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [lightbox, setLightbox] = useState<ClubGalleryPhoto | null>(null);
   const [page, setPage] = useState(1);
 
-  const totalPages = Math.ceil(photos.length / PAGE_SIZE);
+  useEffect(() => {
+    let active = true;
+
+    setLoading(true);
+    setPage(1);
+
+    fetchClubGallery(clubId)
+      .then((items) => {
+        if (active) {
+          setPhotos(items);
+        }
+      })
+      .catch(() => {
+        if (active) {
+          setPhotos([]);
+        }
+      })
+      .finally(() => {
+        if (active) {
+          setLoading(false);
+        }
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [clubId]);
+
+  const totalPages = Math.max(1, Math.ceil(photos.length / PAGE_SIZE));
   const paginatedPhotos = photos.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   return (
@@ -62,7 +77,9 @@ export default function PhotosPage({ params }: { params: Promise<{ clubId: strin
       </div>
 
       <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
-        {photos.length === 0 ? (
+        {loading ? (
+          <p className="text-center text-muted-foreground py-16">Chargement...</p>
+        ) : photos.length === 0 ? (
           <p className="text-center text-muted-foreground py-16">{locale === "fr" ? "Aucune photo disponible." : "No photos available."}</p>
         ) : (
           <>
