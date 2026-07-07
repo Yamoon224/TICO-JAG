@@ -1,17 +1,13 @@
 "use client";
 
 import { use, useEffect, useState } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
+import { ClubPageHero } from "@/components/ClubPageHero";
+import { useClubBrand } from "@/lib/club-brand";
 import { fetchClubCalendar, type ClubMatch as ClubMatchApi } from "@/lib/api";
 import { useLocale } from "@/lib/locale-context";
-import { CalendarDays, ChevronLeft, MapPin, ArrowRight } from "lucide-react";
-
-const clubData: Record<string, { nom: string; acronyme: string; logo: string; hero: string; color: string; colorDark: string }> = {
-  jag: { nom: "Jaguar Académie Guinée", acronyme: "JAG", logo: "/images/jag-logo.png", hero: "/images/jag-hero.png", color: "#CC0000", colorDark: "#990000" },
-  atletico: { nom: "Club Atlético de Colèah", acronyme: "Atlético", logo: "/images/atletico-logo.png", hero: "/images/atletico-hero.png", color: "#F5B800", colorDark: "#C9950A" },
-};
+import { MapPin, ArrowRight } from "lucide-react";
 
 type Match = ClubMatchApi;
 
@@ -26,7 +22,7 @@ function formatDate(dateStr: string, locale: string) {
 export default function CalendrierPage({ params }: { params: Promise<{ clubId: string }> }) {
   const { clubId } = use(params);
   const { locale } = useLocale();
-  const club = clubData[clubId] ?? clubData.jag;
+  const club = useClubBrand(clubId);
   const [matches, setMatches] = useState<Match[]>([]);
   const [loading, setLoading] = useState(true);
   const [cat, setCat] = useState<CatFilter>("Tous");
@@ -64,22 +60,7 @@ export default function CalendrierPage({ params }: { params: Promise<{ clubId: s
     <div className="min-h-screen bg-background">
       <Navbar />
 
-      {/* Hero */}
-      <div className="relative h-40 sm:h-52 overflow-hidden" style={{ backgroundColor: club.colorDark }}>
-        <Image src={club.hero} alt={club.nom} fill className="object-cover opacity-15" />
-        <div className="relative max-w-5xl mx-auto px-4 sm:px-6 h-full flex flex-col justify-end pb-6">
-          <Link href={`/clubs/${clubId}`} className="flex items-center gap-1.5 text-white/60 hover:text-white text-xs mb-3 transition-colors w-fit">
-            <ChevronLeft size={14} />{club.acronyme}
-          </Link>
-          <div className="flex items-center gap-3">
-            <Image src={club.logo} alt={club.nom} width={44} height={44} className="rounded-full border-2 border-white/30 object-cover" />
-            <div>
-              <p className="text-white/60 text-xs uppercase tracking-widest font-semibold">{locale === "fr" ? "Calendrier" : "Schedule"}</p>
-              <h1 className="text-white font-black text-xl sm:text-2xl leading-tight">{club.nom}</h1>
-            </div>
-          </div>
-        </div>
-      </div>
+      <ClubPageHero clubId={clubId} club={club} label={locale === "fr" ? "Calendrier" : "Schedule"} />
 
       {/* Category tabs */}
       <div className="border-b border-border bg-card">
@@ -111,7 +92,7 @@ export default function CalendrierPage({ params }: { params: Promise<{ clubId: s
                 <div className="flex items-center gap-3 sm:gap-4 shrink-0">
                   <div className="w-14 h-14 rounded-sm flex flex-col items-center justify-center text-white text-center" style={{ backgroundColor: club.color }}>
                     <span className="text-xs font-semibold leading-tight">{new Date(m.date).toLocaleDateString("fr-FR", { month: "short" }).toUpperCase()}</span>
-                    <span className="text-2xl font-black leading-tight">{new Date(m.date).getDate()}</span>
+                    <span className="font-display text-2xl font-black leading-tight">{new Date(m.date).getDate()}</span>
                   </div>
                   <span className="inline-flex px-2 py-0.5 rounded-sm text-[10px] font-bold border" style={{ color: club.color, borderColor: club.color }}>
                     {new Date(m.date) >= new Date() ? (locale === "fr" ? "À venir" : "Upcoming") : (locale === "fr" ? "Passé" : "Played")}
@@ -121,7 +102,7 @@ export default function CalendrierPage({ params }: { params: Promise<{ clubId: s
                 {/* Info */}
                 <div className="flex-1 min-w-0">
                   <p className="text-xs text-muted-foreground mb-0.5">{formatDate(m.date, locale)}{m.heure ? ` • ${m.heure}` : ""} &bull; {m.competition}{m.journee ? ` ${m.journee}` : ""} &bull; {m.categorie}</p>
-                  <h3 className="font-black text-foreground text-lg leading-tight">
+                  <h3 className="font-display font-black text-foreground text-lg leading-tight">
                     {locale === "fr" ? `${club.acronyme} vs ${m.adversaire}` : `${club.acronyme} vs ${m.adversaire}`}
                   </h3>
                   <div className="flex items-center gap-1 mt-1 text-xs text-muted-foreground">

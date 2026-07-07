@@ -136,7 +136,7 @@ export default function TeamPage() {
           </Link>
           <div className="min-w-0">
             <p className="text-white/60 text-xs truncate">{club.name}</p>
-            <h1 className="text-white font-black text-2xl sm:text-4xl leading-tight">
+            <h1 className="font-display text-white font-black text-2xl sm:text-4xl leading-tight tracking-tight">
               {t.categories[category]}
             </h1>
             <p className="text-white/50 text-xs mt-0.5">

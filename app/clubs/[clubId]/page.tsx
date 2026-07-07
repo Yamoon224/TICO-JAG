@@ -30,7 +30,7 @@ function formatFoundedDate(value?: string): string {
 
 export default function ClubPage() {
   const params = useParams<{ clubId: string }>();
-  const { t } = useLocale();
+  const { t, locale } = useLocale();
   const [club, setClub] = useState<ClubApiModel | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -122,7 +122,7 @@ export default function ClubPage() {
             height={72}
             className="rounded-full border-4 border-white shadow-xl object-cover"
           />
-          <h1 className="text-white font-black text-2xl sm:text-4xl md:text-5xl text-balance leading-tight">
+          <h1 className="font-display text-white font-black text-2xl sm:text-4xl md:text-5xl text-balance leading-tight tracking-tight">
             {club.name}
           </h1>
           <p className="text-white/60 text-sm">
@@ -140,7 +140,7 @@ export default function ClubPage() {
           { label: t.club.ourTeams, value: String((club.teams ?? []).length) },
         ].map((s) => (
           <div key={s.label} className="py-4 text-center border-r border-white/20 last:border-0">
-            <p className="font-black text-xl md:text-2xl text-white leading-tight">{s.value}</p>
+            <p className="font-display font-black text-xl md:text-2xl text-white leading-tight">{s.value}</p>
             <p className="text-white/70 text-xs uppercase tracking-wide mt-0.5">{s.label}</p>
           </div>
         ))}
@@ -150,17 +150,17 @@ export default function ClubPage() {
 
         {/* ── About ────────────────────────────────────────── */}
         <section className="mb-12">
-          <h2 className="text-lg md:text-xl font-black text-foreground mb-3 tracking-tight">
+          <h2 className="font-display text-lg md:text-xl font-black text-foreground mb-3 tracking-tight">
             {t.club.about}
           </h2>
           <p className="text-muted-foreground leading-relaxed text-sm md:text-base">
-            {club.description || "Aucune description disponible pour ce club."}
+            {(locale === "en" ? club.description_en : club.description) || club.description || "Aucune description disponible pour ce club."}
           </p>
         </section>
 
         {/* ── Teams grid ───────────────────────────────────── */}
         <section>
-          <h2 className="text-lg md:text-xl font-black text-foreground mb-5 tracking-tight">
+          <h2 className="font-display text-lg md:text-xl font-black text-foreground mb-5 tracking-tight">
             {t.club.ourTeams}
           </h2>
           <div className="grid sm:grid-cols-3 gap-4">
@@ -178,7 +178,7 @@ export default function ClubPage() {
                   >
                     {cat[0]}
                   </div>
-                  <h3 className="font-black text-foreground text-base mb-1">
+                  <h3 className="font-display font-black text-foreground text-base mb-1">
                     {t.categories[cat]}
                   </h3>
                   <p className="text-muted-foreground text-sm mb-4">

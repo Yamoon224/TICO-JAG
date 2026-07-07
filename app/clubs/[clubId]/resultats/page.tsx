@@ -1,17 +1,12 @@
 "use client";
 
 import { use, useEffect, useState } from "react";
-import Image from "next/image";
-import Link from "next/link";
 import Navbar from "@/components/Navbar";
+import { ClubPageHero } from "@/components/ClubPageHero";
+import { useClubBrand } from "@/lib/club-brand";
 import { fetchClubResults, type ClubMatch as ClubMatchApi } from "@/lib/api";
 import { useLocale } from "@/lib/locale-context";
-import { ChevronLeft, MapPin } from "lucide-react";
-
-const clubData: Record<string, { nom: string; acronyme: string; logo: string; hero: string; color: string; colorDark: string }> = {
-  jag: { nom: "Jaguar Académie Guinée", acronyme: "JAG", logo: "/images/jag-logo.png", hero: "/images/jag-hero.png", color: "#CC0000", colorDark: "#990000" },
-  atletico: { nom: "Club Atlético de Colèah", acronyme: "Atlético", logo: "/images/atletico-logo.png", hero: "/images/atletico-hero.png", color: "#F5B800", colorDark: "#C9950A" },
-};
+import { MapPin } from "lucide-react";
 
 type Resultat = ClubMatchApi;
 
@@ -31,7 +26,7 @@ function formatDate(dateStr: string, locale: string) {
 export default function ResultatsPage({ params }: { params: Promise<{ clubId: string }> }) {
   const { clubId } = use(params);
   const { locale } = useLocale();
-  const club = clubData[clubId] ?? clubData.jag;
+  const club = useClubBrand(clubId);
   const [resultats, setResultats] = useState<Resultat[]>([]);
   const [loading, setLoading] = useState(true);
   const [cat, setCat] = useState<CatFilter>("Tous");
@@ -69,22 +64,7 @@ export default function ResultatsPage({ params }: { params: Promise<{ clubId: st
     <div className="min-h-screen bg-background">
       <Navbar />
 
-      {/* Hero */}
-      <div className="relative h-40 sm:h-52 overflow-hidden" style={{ backgroundColor: club.colorDark }}>
-        <Image src={club.hero} alt={club.nom} fill className="object-cover opacity-15" />
-        <div className="relative max-w-5xl mx-auto px-4 sm:px-6 h-full flex flex-col justify-end pb-6">
-          <Link href={`/clubs/${clubId}`} className="flex items-center gap-1.5 text-white/60 hover:text-white text-xs mb-3 transition-colors w-fit">
-            <ChevronLeft size={14} />{club.acronyme}
-          </Link>
-          <div className="flex items-center gap-3">
-            <Image src={club.logo} alt={club.nom} width={44} height={44} className="rounded-full border-2 border-white/30 object-cover" />
-            <div>
-              <p className="text-white/60 text-xs uppercase tracking-widest font-semibold">{locale === "fr" ? "Résultats" : "Results"}</p>
-              <h1 className="text-white font-black text-xl sm:text-2xl leading-tight">{club.nom}</h1>
-            </div>
-          </div>
-        </div>
-      </div>
+      <ClubPageHero clubId={clubId} club={club} label={locale === "fr" ? "Résultats" : "Results"} />
 
       {/* Category tabs */}
       <div className="border-b border-border bg-card">
@@ -128,15 +108,15 @@ export default function ResultatsPage({ params }: { params: Promise<{ clubId: st
 
                   {/* Score */}
                   <div className="flex items-center gap-3 shrink-0">
-                    <span className="font-black text-3xl text-foreground tabular-nums">{scoreClub}</span>
+                    <span className="font-display font-black text-3xl text-foreground tabular-nums">{scoreClub}</span>
                     <span className="text-muted-foreground font-bold">—</span>
-                    <span className="font-black text-3xl text-foreground tabular-nums">{scoreAdv}</span>
+                    <span className="font-display font-black text-3xl text-foreground tabular-nums">{scoreAdv}</span>
                   </div>
 
                   {/* Info */}
                   <div className="flex-1 min-w-0">
                     <p className="text-xs text-muted-foreground mb-0.5">{formatDate(r.date, locale)} &bull; {r.competition} &bull; {r.categorie}</p>
-                    <h3 className="font-black text-foreground text-base leading-tight">
+                    <h3 className="font-display font-black text-foreground text-base leading-tight">
                       {club.acronyme} vs {r.adversaire}
                     </h3>
                     <div className="flex items-center gap-1 mt-1 text-xs text-muted-foreground">

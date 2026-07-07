@@ -49,7 +49,7 @@ export default function PlayerCard({ player, primaryColor }: Props) {
       >
         {/* Big ghost number */}
         <span
-          className="absolute inset-0 flex items-center justify-center text-[5rem] font-black leading-none select-none pointer-events-none"
+          className="font-display absolute inset-0 flex items-center justify-center text-[5rem] font-black leading-none select-none pointer-events-none"
           style={{ color: primaryColor + "25" }}
         >
           {player.numero}
@@ -64,7 +64,7 @@ export default function PlayerCard({ player, primaryColor }: Props) {
         />
         {/* Number badge */}
         <span
-          className="absolute top-2 left-2 w-7 h-7 rounded-sm flex items-center justify-center text-xs font-black text-white shadow"
+          className="font-display absolute top-2 left-2 w-7 h-7 rounded-sm flex items-center justify-center text-xs font-black text-white shadow"
           style={{ backgroundColor: primaryColor }}
         >
           {player.numero}
@@ -77,7 +77,7 @@ export default function PlayerCard({ player, primaryColor }: Props) {
 
       {/* Info */}
       <div className="p-3">
-        <p className="font-black text-foreground text-sm leading-tight truncate">
+        <p className="font-display font-black text-foreground text-sm leading-tight truncate">
           {player.prenom} <span className="uppercase">{player.nom}</span>
         </p>
 

@@ -1,54 +1,14 @@
 "use client";
 
-import { use } from "react";
-import Image from "next/image";
-import Link from "next/link";
+import { use, useEffect, useState } from "react";
 import Navbar from "@/components/Navbar";
+import { ClubPageHero } from "@/components/ClubPageHero";
+import { useClubBrand } from "@/lib/club-brand";
 import { useLocale } from "@/lib/locale-context";
-import { ChevronLeft, MapPin, CalendarDays, Ticket } from "lucide-react";
+import { MapPin, CalendarDays, Ticket } from "lucide-react";
+import { fetchClubBillets, type MatchBillets } from "@/lib/api";
 
-const clubData: Record<string, { nom: string; acronyme: string; logo: string; hero: string; color: string; colorDark: string }> = {
-  jag: { nom: "Jaguar Académie Guinée", acronyme: "JAG", logo: "/images/jag-logo.png", hero: "/images/jag-hero.png", color: "#CC0000", colorDark: "#990000" },
-  atletico: { nom: "Club Atlético de Colèah", acronyme: "Atlético", logo: "/images/atletico-logo.png", hero: "/images/atletico-hero.png", color: "#F5B800", colorDark: "#C9950A" },
-};
-
-type TypePlace = "Tribune" | "Pelouse" | "VIP" | "Loge";
-type BilletInfo = { type: TypePlace; prix: string; disponible: number; total: number };
-type MatchBillets = { matchId: number; adversaire: string; date: string; competition: string; stade: string; categorie: string; billets: BilletInfo[] };
-
-const billetsData: Record<string, MatchBillets[]> = {
-  jag: [
-    {
-      matchId: 1,
-      adversaire: "FC Kakimbo",
-      date: "2025-05-10",
-      competition: "Ligue des Académies",
-      stade: "Stade du 28 Septembre",
-      categorie: "Juniors",
-      billets: [
-        { type: "Tribune", prix: "20 000 GNF", disponible: 500, total: 500 },
-        { type: "VIP", prix: "80 000 GNF", disponible: 50, total: 50 },
-      ],
-    },
-  ],
-  atletico: [
-    {
-      matchId: 7,
-      adversaire: "Kaloum Star",
-      date: "2025-05-11",
-      competition: "Championnat Guinée",
-      stade: "Stade Général Lansana Conté",
-      categorie: "Seniors",
-      billets: [
-        { type: "Tribune", prix: "30 000 GNF", disponible: 1000, total: 1000 },
-        { type: "VIP", prix: "100 000 GNF", disponible: 100, total: 100 },
-        { type: "Loge", prix: "200 000 GNF", disponible: 20, total: 20 },
-      ],
-    },
-  ],
-};
-
-const typeIcons: Record<TypePlace, string> = { Tribune: "🏟️", Pelouse: "🌿", VIP: "⭐", Loge: "💎" };
+const typeIcons: Record<string, string> = { Tribune: "🏟️", Pelouse: "🌿", VIP: "⭐", Loge: "💎" };
 
 function formatDate(dateStr: string, locale: string) {
   return new Date(dateStr).toLocaleDateString(locale === "fr" ? "fr-FR" : "en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
@@ -61,32 +21,35 @@ function stockPercent(dispo: number, total: number) {
 export default function BilletsPage({ params }: { params: Promise<{ clubId: string }> }) {
   const { clubId } = use(params);
   const { locale } = useLocale();
-  const club = clubData[clubId] ?? clubData.jag;
-  const matches = billetsData[clubId] ?? [];
+  const club = useClubBrand(clubId);
+  const [matches, setMatches] = useState<MatchBillets[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    fetchClubBillets(clubId)
+      .then((data) => {
+        if (!cancelled) setMatches(data);
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [clubId]);
 
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
 
-      {/* Hero */}
-      <div className="relative h-40 sm:h-52 overflow-hidden" style={{ backgroundColor: club.colorDark }}>
-        <Image src={club.hero} alt={club.nom} fill className="object-cover opacity-15" />
-        <div className="relative max-w-5xl mx-auto px-4 sm:px-6 h-full flex flex-col justify-end pb-6">
-          <Link href={`/clubs/${clubId}`} className="flex items-center gap-1.5 text-white/60 hover:text-white text-xs mb-3 transition-colors w-fit">
-            <ChevronLeft size={14} />{club.acronyme}
-          </Link>
-          <div className="flex items-center gap-3">
-            <Image src={club.logo} alt={club.nom} width={44} height={44} className="rounded-full border-2 border-white/30 object-cover" />
-            <div>
-              <p className="text-white/60 text-xs uppercase tracking-widest font-semibold">{locale === "fr" ? "Billets" : "Tickets"}</p>
-              <h1 className="text-white font-black text-xl sm:text-2xl leading-tight">{club.nom}</h1>
-            </div>
-          </div>
-        </div>
-      </div>
+      <ClubPageHero clubId={clubId} club={club} label={locale === "fr" ? "Billets" : "Tickets"} />
 
       <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
-        {matches.length === 0 ? (
+        {loading ? (
+          <p className="text-center text-muted-foreground py-16">{locale === "fr" ? "Chargement..." : "Loading..."}</p>
+        ) : matches.length === 0 ? (
           <p className="text-center text-muted-foreground py-16">{locale === "fr" ? "Aucun billet disponible." : "No tickets available."}</p>
         ) : (
           <div className="flex flex-col gap-8">
@@ -99,7 +62,7 @@ export default function BilletsPage({ params }: { params: Promise<{ clubId: stri
                       <span className="flex items-center gap-1"><CalendarDays size={11} />{formatDate(m.date, locale)}</span>
                       <span className="flex items-center gap-1"><MapPin size={11} />{m.stade}</span>
                     </div>
-                    <h2 className="font-black text-foreground text-lg leading-tight">
+                    <h2 className="font-display font-black text-foreground text-lg leading-tight">
                       {club.acronyme} <span className="text-muted-foreground font-normal text-sm mx-1">vs</span> {m.adversaire}
                     </h2>
                     <p className="text-xs text-muted-foreground mt-0.5">{m.competition} &bull; {m.categorie}</p>
@@ -117,10 +80,10 @@ export default function BilletsPage({ params }: { params: Promise<{ clubId: stri
                     return (
                       <div key={b.type} className="bg-card px-5 py-4">
                         <div className="flex items-center gap-2 mb-3">
-                          <span className="text-xl">{typeIcons[b.type]}</span>
+                          <span className="text-xl">{typeIcons[b.type] ?? "🎟️"}</span>
                           <h3 className="font-black text-foreground">{b.type}</h3>
                         </div>
-                        <p className="font-black text-2xl text-foreground mb-1">{b.prix}</p>
+                        <p className="font-display font-black text-2xl text-foreground mb-1">{b.prix}</p>
                         {/* Stock bar */}
                         <div className="mb-3">
                           <div className="flex justify-between text-xs text-muted-foreground mb-1">

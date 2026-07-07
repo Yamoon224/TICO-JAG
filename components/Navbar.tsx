@@ -7,11 +7,14 @@ import { Menu, X, Sun, Moon, ChevronDown, ShoppingBag } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useLocale } from "@/lib/locale-context";
 import type { Translations } from "@/lib/i18n";
+import { fetchClubsWithTeams } from "@/lib/api";
 
-const clubs = [
-  { id: "jag", nom: "Jaguar Académie Guinée", acronyme: "JAG", logo: "/images/jag-logo.png", color: "#CC0000" },
-  { id: "atletico", nom: "Club Atlético de Colèah", acronyme: "Atlético", logo: "/images/atletico-logo.png", color: "#F5B800" },
-];
+type NavClub = { id: string; nom: string; acronyme: string; logo: string; color: string };
+
+const FALLBACK_LOGO: Record<string, string> = {
+  jag: "/images/jag-logo.png",
+  atletico: "/images/atletico-logo.png",
+};
 
 function getClubMenuItems(clubId: string, t: Translations) {
   return [
@@ -32,14 +35,14 @@ const categories = [
   { key: "seniors" as const },
 ];
 
-function DesktopClubDropdown({ club, t }: { club: (typeof clubs)[number]; t: Translations }) {
+function DesktopClubDropdown({ club, t }: { club: NavClub; t: Translations }) {
   const menuItems = getClubMenuItems(club.id, t);
 
   return (
     <div className="relative group">
       <Link
         href={`/clubs/${club.id}`}
-        className="flex items-center gap-1.5 px-3 py-2 rounded-sm text-sm font-semibold text-foreground hover:bg-muted transition-colors"
+        className="flex items-center gap-1.5 px-3 py-2 rounded-sm text-sm font-display font-bold text-foreground hover:bg-muted transition-colors"
       >
         <Image src={club.logo} alt={club.nom} width={20} height={20} className="rounded-full object-cover shrink-0" />
         {club.acronyme}
@@ -99,9 +102,29 @@ export default function Navbar() {
   const { theme, setTheme } = useTheme();
   const { locale, setLocale, t } = useLocale();
   const [mounted, setMounted] = useState(false);
+  const [clubs, setClubs] = useState<NavClub[]>([]);
   const mobileRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => setMounted(true), []);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetchClubsWithTeams().then((data) => {
+      if (cancelled) return;
+      setClubs(
+        data.map((club) => ({
+          id: club.slug,
+          nom: club.name,
+          acronyme: club.acronym ?? club.name,
+          logo: club.logo || FALLBACK_LOGO[club.slug] || "/images/jag-logo.png",
+          color: club.primary_color || "#CC0000",
+        }))
+      );
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   return (
     <header className="bg-card border-b border-border sticky top-0 z-50 shadow-sm">

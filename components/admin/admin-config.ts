@@ -10,6 +10,8 @@ export const ADMIN_NAV_ITEMS: Array<{ resource: AdminNavResourceName; label: str
   { resource: "matches", label: "Matchs" },
   { resource: "standings", label: "Classements" },
   { resource: "products", label: "Produits" },
+  { resource: "palmares", label: "Palmares" },
+  { resource: "tickets", label: "Billets" },
 ];
 
 export const ADMIN_RESOURCE_LABELS: Record<AdminNavResourceName, string> = {
@@ -20,4 +22,6 @@ export const ADMIN_RESOURCE_LABELS: Record<AdminNavResourceName, string> = {
   matches: "Gestion des matchs",
   standings: "Gestion des classements",
   products: "Gestion des produits",
+  palmares: "Gestion du palmares",
+  tickets: "Gestion des billets",
 };

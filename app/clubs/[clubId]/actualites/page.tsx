@@ -2,16 +2,12 @@
 
 import { use, useEffect, useState } from "react";
 import Image from "next/image";
-import Link from "next/link";
 import Navbar from "@/components/Navbar";
+import { ClubPageHero } from "@/components/ClubPageHero";
+import { useClubBrand } from "@/lib/club-brand";
 import { fetchClubArticles, type NewsArticle } from "@/lib/api";
 import { useLocale } from "@/lib/locale-context";
-import { ChevronLeft, CalendarDays } from "lucide-react";
-
-const clubData: Record<string, { nom: string; acronyme: string; logo: string; hero: string; color: string; colorDark: string }> = {
-  jag: { nom: "Jaguar Académie Guinée", acronyme: "JAG", logo: "/images/jag-logo.png", hero: "/images/jag-hero.png", color: "#CC0000", colorDark: "#990000" },
-  atletico: { nom: "Club Atlético de Colèah", acronyme: "Atlético", logo: "/images/atletico-logo.png", hero: "/images/atletico-hero.png", color: "#F5B800", colorDark: "#C9950A" },
-};
+import { CalendarDays } from "lucide-react";
 
 function formatDate(dateStr: string, locale: string) {
   return new Date(dateStr).toLocaleDateString(locale === "fr" ? "fr-FR" : "en-GB", { day: "numeric", month: "long", year: "numeric" });
@@ -20,7 +16,7 @@ function formatDate(dateStr: string, locale: string) {
 export default function ActualitesPage({ params }: { params: Promise<{ clubId: string }> }) {
   const { clubId } = use(params);
   const { locale } = useLocale();
-  const club = clubData[clubId] ?? clubData.jag;
+  const club = useClubBrand(clubId);
   const [articles, setArticles] = useState<NewsArticle[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -55,22 +51,7 @@ export default function ActualitesPage({ params }: { params: Promise<{ clubId: s
     <div className="min-h-screen bg-background">
       <Navbar />
 
-      {/* Hero */}
-      <div className="relative h-40 sm:h-52 overflow-hidden" style={{ backgroundColor: club.colorDark }}>
-        <Image src={club.hero} alt={club.nom} fill className="object-cover opacity-15" />
-        <div className="relative max-w-5xl mx-auto px-4 sm:px-6 h-full flex flex-col justify-end pb-6">
-          <Link href={`/clubs/${clubId}`} className="flex items-center gap-1.5 text-white/60 hover:text-white text-xs mb-3 transition-colors w-fit">
-            <ChevronLeft size={14} />{club.acronyme}
-          </Link>
-          <div className="flex items-center gap-3">
-            <Image src={club.logo} alt={club.nom} width={44} height={44} className="rounded-full border-2 border-white/30 object-cover" />
-            <div>
-              <p className="text-white/60 text-xs uppercase tracking-widest font-semibold">{locale === "fr" ? "Actualités" : "News"}</p>
-              <h1 className="text-white font-black text-xl sm:text-2xl leading-tight">{club.nom}</h1>
-            </div>
-          </div>
-        </div>
-      </div>
+      <ClubPageHero clubId={clubId} club={club} label={locale === "fr" ? "Actualités" : "News"} />
 
       <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
         {loading && orderedArticles.length === 0 && (
@@ -105,7 +86,7 @@ export default function ActualitesPage({ params }: { params: Promise<{ clubId: s
                   <CalendarDays size={11} />
                   <span>{formatDate(a.datePublication, locale)}</span>
                 </div>
-                <h2 className={`font-black text-foreground leading-tight mb-2 ${
+                <h2 className={`font-display font-black text-foreground leading-tight mb-2 ${
                   i === 0 ? "text-xl sm:text-2xl" : "text-base"
                 }`}>{a.titre}</h2>
                 <p className="text-sm text-muted-foreground leading-relaxed line-clamp-3">{a.contenu}</p>

@@ -1,57 +1,69 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import Navbar from "@/components/Navbar";
 import { useLocale } from "@/lib/locale-context";
+import { fetchClubsWithTeams, type ClubApiModel } from "@/lib/api";
 
-const clubs = [
-    {
-        id: "jag",
-        nom: "Jaguar Académie Guinée",
-        acronyme: "JAG",
-        fondation: "2005",
-        ville: "Conakry",
-        logo: "/images/jag-logo.png",
-        hero: "/images/jag-hero.png",
-        couleurPrimaire: "#CC0000",
-        description: {
-            fr: "La Jaguar Académie Guinée est un club de football guinéen fondé pour promouvoir les jeunes talents de Conakry. Réputée pour sa formation rigoureuse, l'académie développe des joueurs compétitifs à travers ses trois catégories.",
-            en: "Jaguar Académie Guinée is a Guinean football club founded to promote young talent from Conakry. Known for rigorous training, the academy develops competitive players across its three age groups.",
-        },
+const FALLBACK_LOGO: Record<string, string> = {
+    jag: "/images/jag-logo.png",
+    atletico: "/images/atletico-logo.png",
+};
+const FALLBACK_HERO: Record<string, string> = {
+    jag: "/images/jag-hero.png",
+    atletico: "/images/atletico-hero.png",
+};
+
+type HomeClub = {
+    id: string;
+    nom: string;
+    acronyme: string;
+    ville: string;
+    logo: string;
+    hero: string;
+    couleurPrimaire: string;
+    description: string;
+    stats: { label: { fr: string; en: string }; value: string | number }[];
+};
+
+function toHomeClub(club: ClubApiModel, locale: "fr" | "en"): HomeClub {
+    const foundedYear = club.founded_at ? new Date(club.founded_at).getFullYear() : undefined;
+
+    return {
+        id: club.slug,
+        nom: club.name,
+        acronyme: club.acronym ?? club.name,
+        ville: club.city ?? "",
+        logo: club.logo || FALLBACK_LOGO[club.slug] || "/images/jag-logo.png",
+        hero: club.hero || FALLBACK_HERO[club.slug] || "/images/jag-hero.png",
+        couleurPrimaire: club.primary_color || "#CC0000",
+        description: (locale === "en" ? club.description_en : club.description) || club.description || "",
         stats: [
-            { label: { fr: "Fondation", en: "Founded" }, value: "2005" },
-            { label: { fr: "Joueurs", en: "Players" }, value: "75+" },
-            { label: { fr: "Équipes", en: "Squads" }, value: "3" },
-            { label: { fr: "Ville", en: "City" }, value: "Conakry" },
+            { label: { fr: "Fondation", en: "Founded" }, value: foundedYear ?? "—" },
+            { label: { fr: "Joueurs", en: "Players" }, value: club.stats ? `${club.stats.players_count}+` : "—" },
+            { label: { fr: "Équipes", en: "Squads" }, value: club.stats?.teams_count ?? "—" },
+            { label: { fr: "Ville", en: "City" }, value: club.city ?? "—" },
         ],
-    },
-    {
-        id: "atletico",
-        nom: "Club Atlético de Colèah",
-        acronyme: "Atlético",
-        fondation: "1998",
-        ville: "Colèah, Conakry",
-        logo: "/images/atletico-logo.png",
-        hero: "/images/atletico-hero.png",
-        couleurPrimaire: "#F5B800",
-        description: {
-            fr: "Le Club Atlético de Colèah est un club historique du quartier de Colèah à Conakry. Avec une tradition sportive solide et une grande communauté de supporters, il représente la fierté de son quartier.",
-            en: "Club Atlético de Colèah is a historic club from the Colèah district of Conakry. With a solid sporting tradition and a large supporter community, it embodies the pride of its neighbourhood.",
-        },
-        stats: [
-            { label: { fr: "Fondation", en: "Founded" }, value: "1998" },
-            { label: { fr: "Joueurs", en: "Players" }, value: "80+" },
-            { label: { fr: "Équipes", en: "Squads" }, value: "3" },
-            { label: { fr: "Ville", en: "City" }, value: "Colèah" },
-        ],
-    },
-];
+    };
+}
 
 const CATEGORIES = ["cadets", "juniors", "seniors"] as const;
 
 export default function HomePage() {
     const { locale, t } = useLocale();
+    const [clubs, setClubs] = useState<HomeClub[]>([]);
+
+    useEffect(() => {
+        let cancelled = false;
+        fetchClubsWithTeams().then((data) => {
+            if (!cancelled) setClubs(data.map((club) => toHomeClub(club, locale)));
+        });
+        return () => {
+            cancelled = true;
+        };
+    }, [locale]);
 
     return (
         <div className="min-h-screen bg-background">
@@ -70,7 +82,7 @@ export default function HomePage() {
                     <p className="text-xs font-bold uppercase tracking-widest mb-4 opacity-60">
                         {t.home.tagline}
                     </p>
-                    <h1 className="text-3xl sm:text-5xl md:text-6xl font-black text-balance leading-tight mb-5">
+                    <h1 className="font-display text-3xl sm:text-5xl md:text-6xl font-black text-balance leading-[1.05] tracking-tight mb-5">
                         {t.home.heroTitle}
                     </h1>
                     <p className="text-base md:text-lg opacity-70 max-w-xl mx-auto leading-relaxed mb-10">
@@ -93,7 +105,7 @@ export default function HomePage() {
 
             {/* ── Message du Président ────────────────────────── */}
             <section className="max-w-6xl mx-auto px-4 sm:px-6 py-10 md:py-15">
-                <h2 className="text-xl md:text-2xl font-black text-foreground text-center mb-10 tracking-tight">
+                <h2 className="font-display text-xl md:text-2xl font-black text-foreground text-center mb-10 tracking-tight">
                     Message du Président
                 </h2>
                 <div className="bg-card border border-border rounded-sm overflow-hidden flex flex-col md:flex-row gap-0">
@@ -125,7 +137,7 @@ export default function HomePage() {
 
             {/* ── Club cards ──────────────────────────────────── */}
             <section className="max-w-6xl mx-auto px-4 sm:px-6 py-16 md:py-20">
-                <h2 className="text-xl md:text-2xl font-black text-foreground text-center mb-10 tracking-tight">
+                <h2 className="font-display text-xl md:text-2xl font-black text-foreground text-center mb-10 tracking-tight">
                     {t.home.ourClubs}
                 </h2>
 
@@ -153,23 +165,23 @@ export default function HomePage() {
                                         className="rounded-full border-2 border-white object-cover shadow"
                                     />
                                     <div>
-                                        <p className="text-white font-black text-lg leading-tight">{club.acronyme}</p>
+                                        <p className="font-display text-white font-black text-lg leading-tight">{club.acronyme}</p>
                                         <p className="text-white/60 text-xs">{club.ville}</p>
                                     </div>
                                 </div>
                             </div>
 
                             <div className="p-5">
-                                <h3 className="font-black text-foreground text-base mb-1.5">{club.nom}</h3>
+                                <h3 className="font-display font-black text-foreground text-base mb-1.5">{club.nom}</h3>
                                 <p className="text-muted-foreground text-sm leading-relaxed line-clamp-2 mb-4">
-                                    {club.description[locale]}
+                                    {club.description}
                                 </p>
 
                                 {/* Stats */}
                                 <div className="grid grid-cols-4 gap-1.5 mb-5">
                                     {club.stats.map((s) => (
                                         <div key={s.label.fr} className="text-center bg-muted rounded-sm py-2 px-1">
-                                            <p className="font-black text-sm text-foreground leading-none mb-0.5">{s.value}</p>
+                                            <p className="font-display font-black text-sm text-foreground leading-none mb-0.5">{s.value}</p>
                                             <p className="text-xs text-muted-foreground truncate">{s.label[locale]}</p>
                                         </div>
                                     ))}

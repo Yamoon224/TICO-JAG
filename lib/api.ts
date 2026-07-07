@@ -72,11 +72,13 @@ export type ClubApiModel = {
   founded_at?: string;
   city?: string;
   description?: string;
+  description_en?: string;
   logo?: string;
   hero?: string;
   primary_color?: string;
   secondary_color?: string;
   social?: { facebook?: string; youtube?: string };
+  stats?: { teams_count: number; players_count: number };
   teams?: ClubApiTeam[];
 };
 
@@ -109,6 +111,32 @@ export type ClubGalleryPhoto = {
   categorie?: string;
 };
 
+export type Palmares = {
+  id: number;
+  club_id: number;
+  competition: string;
+  annee: number;
+  rang: string;
+  description?: string;
+};
+
+export type BilletInfo = {
+  type: string;
+  prix: string;
+  disponible: number;
+  total: number;
+};
+
+export type MatchBillets = {
+  matchId: number;
+  adversaire: string;
+  date: string;
+  competition: string;
+  stade?: string;
+  categorie: string;
+  billets: BilletInfo[];
+};
+
 export type AdminUser = {
   id: number;
   name: string;
@@ -127,7 +155,9 @@ export type AdminResourceName =
   | "news"
   | "matches"
   | "standings"
-  | "products";
+  | "products"
+  | "palmares"
+  | "tickets";
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL ?? "https://ticojag.jss-gn.com/api/v1";
@@ -164,7 +194,9 @@ async function requestJson<T>(
     headers.Authorization = `Bearer ${options.token}`;
   }
 
-  if (options?.body !== undefined) {
+  const isFormData = options?.body instanceof FormData;
+
+  if (options?.body !== undefined && !isFormData) {
     headers["Content-Type"] = "application/json";
   }
 
@@ -172,7 +204,11 @@ async function requestJson<T>(
     method,
     cache: "no-store",
     headers,
-    body: options?.body !== undefined ? JSON.stringify(options.body) : undefined,
+    body: options?.body === undefined
+      ? undefined
+      : isFormData
+        ? (options.body as FormData)
+        : JSON.stringify(options.body),
   });
 
   if (!response.ok) {
@@ -274,6 +310,16 @@ export async function fetchClubPlayersByCategory(
   }));
 }
 
+export async function fetchClubPalmares(clubSlug: string): Promise<Palmares[]> {
+  const payload = await getJson<unknown>(`/clubs/${clubSlug}/palmares`);
+  return pickArray<Palmares>(payload);
+}
+
+export async function fetchClubBillets(clubSlug: string): Promise<MatchBillets[]> {
+  const payload = await getJson<unknown>(`/clubs/${clubSlug}/billets`);
+  return pickArray<MatchBillets>(payload);
+}
+
 export async function fetchClubGallery(clubSlug: string): Promise<ClubGalleryPhoto[]> {
   const club = await fetchClubBySlug(clubSlug);
 
@@ -328,7 +374,7 @@ export async function adminList<T = unknown>(resource: AdminResourceName, token:
 export async function adminCreate<T = unknown>(
   resource: AdminResourceName,
   token: string,
-  body: Record<string, unknown>
+  body: Record<string, unknown> | FormData
 ): Promise<T> {
   const payload = await requestJson<{ data?: T } | T>(`/${resource}`, {
     method: "POST",
@@ -345,10 +391,16 @@ export async function adminUpdate<T = unknown>(
   resource: AdminResourceName,
   id: number,
   token: string,
-  body: Record<string, unknown>
+  body: Record<string, unknown> | FormData
 ): Promise<T> {
+  // Laravel doesn't parse multipart bodies on PUT requests — use POST + method spoofing for file uploads.
+  const isFormData = body instanceof FormData;
+  if (isFormData) {
+    body.append("_method", "PUT");
+  }
+
   const payload = await requestJson<{ data?: T } | T>(`/${resource}/${id}`, {
-    method: "PUT",
+    method: isFormData ? "POST" : "PUT",
     token,
     body,
   });

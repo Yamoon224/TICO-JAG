@@ -2,44 +2,19 @@
 
 import { use, useEffect, useState } from "react";
 import Image from "next/image";
-import Link from "next/link";
 import Navbar from "@/components/Navbar";
+import { ClubPageHero } from "@/components/ClubPageHero";
+import { useClubBrand } from "@/lib/club-brand";
 import { fetchClubProducts, type ShopProduct } from "@/lib/api";
 import { useLocale } from "@/lib/locale-context";
-import { ShoppingBag, Truck, RotateCcw, ShieldCheck, ChevronLeft, Star } from "lucide-react";
-
-const clubData: Record<string, {
-  nom: string;
-  acronyme: string;
-  logo: string;
-  hero: string;
-  color: string;
-  colorDark: string;
-}> = {
-  jag: {
-    nom: "Jaguar Académie Guinée",
-    acronyme: "JAG",
-    logo: "/images/jag-logo.png",
-    hero: "/images/jag-hero.png",
-    color: "#CC0000",
-    colorDark: "#990000",
-  },
-  atletico: {
-    nom: "Club Atlético de Colèah",
-    acronyme: "Atlético",
-    logo: "/images/atletico-logo.png",
-    hero: "/images/atletico-hero.png",
-    color: "#F5B800",
-    colorDark: "#C9950A",
-  },
-};
+import { ShoppingBag, Truck, RotateCcw, ShieldCheck, Star } from "lucide-react";
 
 type CategoryFilter = "all" | "jerseys" | "accessories" | "bags";
 
 export default function BoutiquePage({ params }: { params: Promise<{ clubId: string }> }) {
   const { clubId } = use(params);
   const { locale, t } = useLocale();
-  const club = clubData[clubId] ?? clubData.jag;
+  const club = useClubBrand(clubId);
   const [products, setProducts] = useState<ShopProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeCategory, setActiveCategory] = useState<CategoryFilter>("all");
@@ -82,26 +57,7 @@ export default function BoutiquePage({ params }: { params: Promise<{ clubId: str
     <div className="min-h-screen bg-background">
       <Navbar />
 
-      {/* Hero banner */}
-      <div className="relative overflow-hidden h-40 sm:h-52" style={{ backgroundColor: club.colorDark }}>
-        <Image src={club.hero} alt={club.nom} fill className="object-cover opacity-15" />
-        <div className="relative max-w-6xl mx-auto px-4 sm:px-6 h-full flex flex-col justify-end pb-6">
-          <Link
-            href={`/clubs/${clubId}`}
-            className="flex items-center gap-1.5 text-white/60 hover:text-white text-xs mb-3 transition-colors w-fit"
-          >
-            <ChevronLeft size={14} />
-            {club.acronyme}
-          </Link>
-          <div className="flex items-center gap-3">
-            <Image src={club.logo} alt={club.nom} width={44} height={44} className="rounded-full border-2 border-white/30 object-cover" />
-            <div>
-              <p className="text-white/60 text-xs uppercase tracking-widest font-semibold">{t.shop.title}</p>
-              <h1 className="text-white font-black text-xl sm:text-2xl leading-tight">{club.nom}</h1>
-            </div>
-          </div>
-        </div>
-      </div>
+      <ClubPageHero clubId={clubId} club={club} label={t.shop.title} />
 
       {/* Trust badges */}
       <div className="border-b border-border bg-card">
@@ -187,7 +143,7 @@ export default function BoutiquePage({ params }: { params: Promise<{ clubId: str
                 </div>
                 <div className="flex items-end justify-between gap-2">
                   <div>
-                    <p className="font-black text-foreground text-sm">{product.price}</p>
+                    <p className="font-display font-black text-foreground text-sm">{product.price}</p>
                     {product.oldPrice && (
                       <p className="text-muted-foreground text-xs line-through">{product.oldPrice}</p>
                     )}

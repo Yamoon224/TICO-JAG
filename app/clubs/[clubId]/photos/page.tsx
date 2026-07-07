@@ -2,23 +2,19 @@
 
 import { use, useEffect, useState } from "react";
 import Image from "next/image";
-import Link from "next/link";
 import Navbar from "@/components/Navbar";
+import { ClubPageHero } from "@/components/ClubPageHero";
+import { useClubBrand } from "@/lib/club-brand";
 import { fetchClubGallery, type ClubGalleryPhoto } from "@/lib/api";
 import { useLocale } from "@/lib/locale-context";
-import { ChevronLeft, X } from "lucide-react";
-
-const clubData: Record<string, { nom: string; acronyme: string; logo: string; hero: string; color: string; colorDark: string }> = {
-  jag: { nom: "Jaguar Académie Guinée", acronyme: "JAG", logo: "/images/jag-logo.png", hero: "/images/jag-hero.png", color: "#CC0000", colorDark: "#990000" },
-  atletico: { nom: "Club Atlético de Colèah", acronyme: "Atlético", logo: "/images/atletico-logo.png", hero: "/images/atletico-hero.png", color: "#F5B800", colorDark: "#C9950A" },
-};
+import { X } from "lucide-react";
 
 const PAGE_SIZE = 9;
 
 export default function PhotosPage({ params }: { params: Promise<{ clubId: string }> }) {
   const { clubId } = use(params);
   const { locale } = useLocale();
-  const club = clubData[clubId] ?? clubData.jag;
+  const club = useClubBrand(clubId);
   const [photos, setPhotos] = useState<ClubGalleryPhoto[]>([]);
   const [loading, setLoading] = useState(true);
   const [lightbox, setLightbox] = useState<ClubGalleryPhoto | null>(null);
@@ -59,22 +55,7 @@ export default function PhotosPage({ params }: { params: Promise<{ clubId: strin
     <div className="min-h-screen bg-background">
       <Navbar />
 
-      {/* Hero */}
-      <div className="relative h-40 sm:h-52 overflow-hidden">
-        <Image src={club.hero} alt={club.nom} fill className="object-cover" />
-        <div className="relative max-w-5xl mx-auto px-4 sm:px-6 h-full flex flex-col justify-end pb-6">
-          <Link href={`/clubs/${clubId}`} className="flex items-center gap-1.5 text-white/60 hover:text-white text-xs mb-3 transition-colors w-fit">
-            <ChevronLeft size={14} />{club.acronyme}
-          </Link>
-          <div className="flex items-center gap-3">
-            <Image src={club.logo} alt={club.nom} width={44} height={44} className="rounded-full border-2 border-white/30 object-cover" />
-            <div>
-              <p className="text-white/60 text-xs uppercase tracking-widest font-semibold">{locale === "fr" ? "Galerie photos" : "Photo gallery"}</p>
-              <h1 className="text-white font-black text-xl sm:text-2xl leading-tight">{club.nom}</h1>
-            </div>
-          </div>
-        </div>
-      </div>
+      <ClubPageHero clubId={clubId} club={club} label={locale === "fr" ? "Galerie photos" : "Photo gallery"} dim={false} />
 
       <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
         {loading ? (

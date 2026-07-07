@@ -76,6 +76,7 @@ export function AdminEntityManager({ resource }: { resource: AdminResourceName }
     height: "",
     photo: "",
   });
+  const [playerPhotoFile, setPlayerPhotoFile] = useState<File | null>(null);
 
   const [newsForm, setNewsForm] = useState({
     club_id: "",
@@ -119,6 +120,22 @@ export function AdminEntityManager({ resource }: { resource: AdminResourceName }
     goals_against: "",
     points: "",
     is_club: false,
+  });
+
+  const [palmaresForm, setPalmaresForm] = useState({
+    club_id: "",
+    competition: "",
+    year: "",
+    rank: "",
+    description: "",
+  });
+
+  const [ticketForm, setTicketForm] = useState({
+    club_match_id: "",
+    type: "Tribune",
+    price: "",
+    available: "",
+    total: "",
   });
 
   const [productForm, setProductForm] = useState({
@@ -200,6 +217,8 @@ export function AdminEntityManager({ resource }: { resource: AdminResourceName }
     if (resource === "news") return asString(record.title) || asString(record.titre);
     if (resource === "matches") return `${asString(record.competition)} - ${asString(record.opponent) || asString(record.adversaire)}`;
     if (resource === "standings") return `${asString(record.position)} - ${asString(record.team_name) || asString(record.equipe)}`;
+    if (resource === "palmares") return `${asString(record.annee)} - ${asString(record.competition)} (${asString(record.rang)})`;
+    if (resource === "tickets") return `Match #${asString(record.club_match_id)} - ${asString(record.type)}`;
 
     const names = (record.name as Record<string, unknown> | undefined) ?? {};
     return asString(record.name_fr) || asString(names.fr);
@@ -287,6 +306,26 @@ export function AdminEntityManager({ resource }: { resource: AdminResourceName }
         goals_against: parseNumeric(standingForm.goals_against),
         points: parseNumeric(standingForm.points),
         is_club: standingForm.is_club,
+      });
+    }
+
+    if (resource === "palmares") {
+      return withOptional({
+        club_id: parseNumeric(palmaresForm.club_id),
+        competition: palmaresForm.competition,
+        year: parseNumeric(palmaresForm.year),
+        rank: palmaresForm.rank,
+        description: palmaresForm.description,
+      });
+    }
+
+    if (resource === "tickets") {
+      return withOptional({
+        club_match_id: parseNumeric(ticketForm.club_match_id),
+        type: ticketForm.type,
+        price: ticketForm.price,
+        available: parseNumeric(ticketForm.available),
+        total: parseNumeric(ticketForm.total),
       });
     }
 
@@ -402,6 +441,28 @@ export function AdminEntityManager({ resource }: { resource: AdminResourceName }
       return;
     }
 
+    if (resource === "palmares") {
+      setPalmaresForm({
+        club_id: asString(record.club_id),
+        competition: asString(record.competition),
+        year: asString(record.annee) || asString(record.year),
+        rank: asString(record.rang) || asString(record.rank),
+        description: asString(record.description),
+      });
+      return;
+    }
+
+    if (resource === "tickets") {
+      setTicketForm({
+        club_match_id: asString(record.club_match_id),
+        type: asString(record.type) || "Tribune",
+        price: asString(record.price) || asString(record.prix),
+        available: asString(record.available) || asString(record.disponible),
+        total: asString(record.total),
+      });
+      return;
+    }
+
     const names = (record.name as Record<string, unknown> | undefined) ?? {};
     setProductForm((prev) => ({
       ...prev,
@@ -425,15 +486,32 @@ export function AdminEntityManager({ resource }: { resource: AdminResourceName }
     setManualId("");
     setClubForm((prev) => ({ ...prev, slug: "", name: "", acronym: "", founded_at: "", city: "", description: "", logo: "", hero: "" }));
     setPlayerForm((prev) => ({ ...prev, number: "", first_name: "", last_name: "", date_of_birth: "", position: "", height: "", photo: "" }));
+    setPlayerPhotoFile(null);
     setNewsForm((prev) => ({ ...prev, slug: "", title: "", excerpt: "", content: "", image: "", category: "", published_at: "" }));
     setMatchForm((prev) => ({ ...prev, opponent: "", competition: "", match_date: "", match_time: "", day_label: "", stadium: "", club_score: "", opponent_score: "" }));
     setStandingForm((prev) => ({ ...prev, competition: "", season: "", position: "", team_name: "", played: "", wins: "", draws: "", losses: "", goals_for: "", goals_against: "", points: "" }));
     setProductForm((prev) => ({ ...prev, slug: "", name_fr: "", name_en: "", price: "", image: "", old_price: "", rating: "", reviews: "" }));
+    setPalmaresForm((prev) => ({ ...prev, competition: "", year: "", rank: "", description: "" }));
+    setTicketForm((prev) => ({ ...prev, club_match_id: "", price: "", available: "", total: "" }));
   }
 
   function selectedId(): number | null {
     if (editingId !== null) return editingId;
     return parseNumeric(manualId);
+  }
+
+  function buildPlayerFormData(): FormData {
+    const data = new FormData();
+    Object.entries(currentPayload()).forEach(([key, value]) => {
+      if (key === "photo") return;
+      if (value !== null && value !== undefined) data.append(key, String(value));
+    });
+    if (playerPhotoFile) {
+      data.append("photo", playerPhotoFile);
+    } else if (playerForm.photo) {
+      data.append("photo", playerForm.photo);
+    }
+    return data;
   }
 
   async function handleCreate() {
@@ -442,7 +520,8 @@ export function AdminEntityManager({ resource }: { resource: AdminResourceName }
     setError("");
     setMessage("");
     try {
-      await adminCreate(resource, token, currentPayload());
+      const payload = resource === "players" && playerPhotoFile ? buildPlayerFormData() : currentPayload();
+      await adminCreate(resource, token, payload);
       setMessage("Creation effectuee.");
       await loadRecords();
       await refreshReferenceData();
@@ -466,7 +545,8 @@ export function AdminEntityManager({ resource }: { resource: AdminResourceName }
     setError("");
     setMessage("");
     try {
-      await adminUpdate(resource, id, token, currentPayload());
+      const payload = resource === "players" && playerPhotoFile ? buildPlayerFormData() : currentPayload();
+      await adminUpdate(resource, id, token, payload);
       setMessage("Mise a jour effectuee.");
       await loadRecords();
       await refreshReferenceData();
@@ -537,7 +617,52 @@ export function AdminEntityManager({ resource }: { resource: AdminResourceName }
           <input className={inputClass} type="date" value={playerForm.date_of_birth} onChange={(e) => setPlayerForm({ ...playerForm, date_of_birth: e.target.value })} />
           <input className={inputClass} placeholder="Poste" value={playerForm.position} onChange={(e) => setPlayerForm({ ...playerForm, position: e.target.value })} />
           <input className={inputClass} placeholder="Taille" value={playerForm.height} onChange={(e) => setPlayerForm({ ...playerForm, height: e.target.value })} />
-          <input className={inputClass} placeholder="Photo URL" value={playerForm.photo} onChange={(e) => setPlayerForm({ ...playerForm, photo: e.target.value })} />
+          <div className="md:col-span-2 flex flex-col gap-1.5">
+            <label className="text-xs font-medium text-slate-600">Photo du joueur</label>
+            <input
+              className={inputClass}
+              type="file"
+              accept="image/*"
+              onChange={(e) => setPlayerPhotoFile(e.target.files?.[0] ?? null)}
+            />
+            {playerForm.photo && !playerPhotoFile && (
+              <p className="text-xs text-slate-500">Photo actuelle conservée si aucun fichier n&apos;est choisi.</p>
+            )}
+          </div>
+        </div>
+      );
+    }
+
+    if (resource === "palmares") {
+      return (
+        <div className="grid md:grid-cols-2 gap-3">
+          <select className={inputClass} value={palmaresForm.club_id} onChange={(e) => setPalmaresForm({ ...palmaresForm, club_id: e.target.value })}>
+            <option value="">Selectionner un club</option>
+            {clubOptions.map((club) => (
+              <option key={club.id} value={club.id}>{club.name}</option>
+            ))}
+          </select>
+          <input className={inputClass} placeholder="Annee" type="number" value={palmaresForm.year} onChange={(e) => setPalmaresForm({ ...palmaresForm, year: e.target.value })} />
+          <input className={`${inputClass} md:col-span-2`} placeholder="Competition" value={palmaresForm.competition} onChange={(e) => setPalmaresForm({ ...palmaresForm, competition: e.target.value })} />
+          <input className={inputClass} placeholder="Rang (1er, 2eme, Participant...)" value={palmaresForm.rank} onChange={(e) => setPalmaresForm({ ...palmaresForm, rank: e.target.value })} />
+          <textarea className={`${inputClass} md:col-span-2`} rows={3} placeholder="Description" value={palmaresForm.description} onChange={(e) => setPalmaresForm({ ...palmaresForm, description: e.target.value })} />
+        </div>
+      );
+    }
+
+    if (resource === "tickets") {
+      return (
+        <div className="grid md:grid-cols-2 gap-3">
+          <input className={inputClass} placeholder="ID du match" type="number" value={ticketForm.club_match_id} onChange={(e) => setTicketForm({ ...ticketForm, club_match_id: e.target.value })} />
+          <select className={inputClass} value={ticketForm.type} onChange={(e) => setTicketForm({ ...ticketForm, type: e.target.value })}>
+            <option value="Tribune">Tribune</option>
+            <option value="Pelouse">Pelouse</option>
+            <option value="VIP">VIP</option>
+            <option value="Loge">Loge</option>
+          </select>
+          <input className={inputClass} placeholder="Prix (ex: 20 000 GNF)" value={ticketForm.price} onChange={(e) => setTicketForm({ ...ticketForm, price: e.target.value })} />
+          <input className={inputClass} placeholder="Places disponibles" type="number" value={ticketForm.available} onChange={(e) => setTicketForm({ ...ticketForm, available: e.target.value })} />
+          <input className={inputClass} placeholder="Places totales" type="number" value={ticketForm.total} onChange={(e) => setTicketForm({ ...ticketForm, total: e.target.value })} />
         </div>
       );
     }

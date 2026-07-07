@@ -134,4 +134,15 @@
   body {
     @apply bg-background text-foreground;
   }
+  ::selection {
+    background: color-mix(in oklch, var(--foreground) 15%, transparent);
+  }
+}
+
+@layer utilities {
+  /* Scoreboard-style numerals & headings — the site's one signature type move */
+  .font-display {
+    font-family: var(--font-barlow), 'Barlow', sans-serif;
+    letter-spacing: -0.01em;
+  }
 }
