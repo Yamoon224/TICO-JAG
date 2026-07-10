@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import Navbar from "@/components/Navbar";
+import { SiteFooter } from "@/components/Footer";
 import { useLocale } from "@/lib/locale-context";
 import { fetchClubsWithTeams, type ClubApiModel } from "@/lib/api";
 
@@ -70,22 +71,23 @@ export default function HomePage() {
             <Navbar />
 
             {/* ── Hero ────────────────────────────────────────── */}
-            <section className="relative overflow-hidden bg-foreground text-background">
+            <section className="relative overflow-hidden bg-[#101214] text-white">
                 <Image
                     src="/images/jag-hero.png"
                     alt="Football guinéen"
                     fill
-                    className="object-cover opacity-20"
+                    className="object-cover opacity-25"
                     priority
                 />
-                <div className="relative max-w-5xl mx-auto px-4 sm:px-6 py-20 md:py-32 text-center">
-                    <p className="text-xs font-bold uppercase tracking-widest mb-4 opacity-60">
+                <div className="absolute inset-0 bg-gradient-to-t from-[#101214] via-[#101214]/60 to-[#101214]/20" />
+                <div className="relative max-w-5xl mx-auto px-4 sm:px-6 py-24 md:py-36 text-center">
+                    <p className="text-xs font-bold uppercase tracking-[0.2em] mb-5 text-white/50">
                         {t.home.tagline}
                     </p>
-                    <h1 className="font-display text-3xl sm:text-5xl md:text-6xl font-black text-balance leading-[1.05] tracking-tight mb-5">
+                    <h1 className="font-display text-4xl sm:text-6xl md:text-7xl font-black text-balance leading-[1.03] tracking-tight mb-6">
                         {t.home.heroTitle}
                     </h1>
-                    <p className="text-base md:text-lg opacity-70 max-w-xl mx-auto leading-relaxed mb-10">
+                    <p className="text-base md:text-lg text-white/60 max-w-xl mx-auto leading-relaxed mb-10">
                         {t.home.heroSub}
                     </p>
                     <div className="flex flex-wrap gap-3 justify-center">
@@ -93,7 +95,7 @@ export default function HomePage() {
                             <Link
                                 key={club.id}
                                 href={`/clubs/${club.id}`}
-                                className="px-5 py-2.5 rounded-sm font-semibold text-sm transition-opacity hover:opacity-85"
+                                className="px-6 py-3 rounded-full font-display font-bold text-sm transition-transform hover:scale-105"
                                 style={{ backgroundColor: club.couleurPrimaire, color: "#fff" }}
                             >
                                 {club.nom}
@@ -101,14 +103,15 @@ export default function HomePage() {
                         ))}
                     </div>
                 </div>
+                <div className="relative h-2 bg-gradient-to-r from-jag via-white/20 to-atletico" aria-hidden />
             </section>
 
             {/* ── Message du Président ────────────────────────── */}
-            <section className="max-w-6xl mx-auto px-4 sm:px-6 py-10 md:py-15">
+            <section className="max-w-6xl mx-auto px-4 sm:px-6 py-14 md:py-20">
                 <h2 className="font-display text-xl md:text-2xl font-black text-foreground text-center mb-10 tracking-tight">
                     Message du Président
                 </h2>
-                <div className="bg-card border border-border rounded-sm overflow-hidden flex flex-col md:flex-row gap-0">
+                <div className="bg-card border border-border rounded-2xl overflow-hidden flex flex-col md:flex-row gap-0 shadow-sm">
                     {/* Photo */}
                     <div className="relative md:w-72 shrink-0 h-64 md:h-auto">
                         <Image
@@ -123,7 +126,7 @@ export default function HomePage() {
                         <p className="text-muted-foreground text-sm md:text-base leading-relaxed">
                             C&apos;est avec une immense fierté que je dirige ces deux institutions de football. Je suis une personne qui agit rapidement et efficacement, car les projets qui stagnent finissent par tomber dans l&apos;oubli. Mon ambition est de moderniser le football guinéen, en favorisant bien sûr des collaborations mutuellement bénéfiques. Je reste à l&apos;écoute et disponible à tout moment.
                         </p>
-                        <blockquote className="border-l-4 border-foreground/30 pl-4">
+                        <blockquote className="border-l-4 border-foreground/20 pl-4">
                             <p className="text-foreground font-semibold text-sm md:text-base italic leading-snug">
                                 &ldquo;La stagnation mène à l&apos;oubli&nbsp;; c&apos;est à travers l&apos;action et la collaboration que nous façonnerons l&apos;avenir du football guinéen.&rdquo;
                             </p>
@@ -145,7 +148,8 @@ export default function HomePage() {
                     {clubs.map((club) => (
                         <div
                             key={club.id}
-                            className="group bg-card border border-border rounded-sm overflow-hidden hover:shadow-md transition-shadow"
+                            className="group bg-card border border-border rounded-2xl overflow-hidden hover:shadow-xl transition-shadow duration-300"
+                            style={{ "--club": club.couleurPrimaire } as CSSProperties}
                         >
                             {/* Hero image */}
                             <div className="relative h-44 sm:h-52 overflow-hidden">
@@ -155,8 +159,9 @@ export default function HomePage() {
                                     fill
                                     className="object-cover group-hover:scale-105 transition-transform duration-500"
                                 />
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent" />
-                                <div className="absolute bottom-3 left-4 flex items-end gap-3">
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/25 to-transparent" />
+                                <div className="scoreboard-tile absolute inset-x-0 bottom-0 h-[3px]" aria-hidden />
+                                <div className="absolute bottom-4 left-4 flex items-end gap-3">
                                     <Image
                                         src={club.logo}
                                         alt={club.nom}
@@ -171,7 +176,7 @@ export default function HomePage() {
                                 </div>
                             </div>
 
-                            <div className="p-5">
+                            <div className="p-5 sm:p-6">
                                 <h3 className="font-display font-black text-foreground text-base mb-1.5">{club.nom}</h3>
                                 <p className="text-muted-foreground text-sm leading-relaxed line-clamp-2 mb-4">
                                     {club.description}
@@ -180,9 +185,9 @@ export default function HomePage() {
                                 {/* Stats */}
                                 <div className="grid grid-cols-4 gap-1.5 mb-5">
                                     {club.stats.map((s) => (
-                                        <div key={s.label.fr} className="text-center bg-muted rounded-sm py-2 px-1">
-                                            <p className="font-display font-black text-sm text-foreground leading-none mb-0.5">{s.value}</p>
-                                            <p className="text-xs text-muted-foreground truncate">{s.label[locale]}</p>
+                                        <div key={s.label.fr} className="text-center bg-muted rounded-lg py-2 px-1">
+                                            <p className="font-display font-black text-sm text-foreground leading-none mb-1 tabular-nums">{s.value}</p>
+                                            <p className="text-[11px] text-muted-foreground truncate">{s.label[locale]}</p>
                                         </div>
                                     ))}
                                 </div>
@@ -193,10 +198,7 @@ export default function HomePage() {
                                         <Link
                                             key={cat}
                                             href={`/clubs/${club.id}/equipe/${cat}`}
-                                            className={`text-xs font-semibold px-3 py-1 rounded-sm border transition-colors ${club.id === "jag"
-                                                    ? "border-amber-500 text-amber-600 dark:text-amber-400 hover:bg-amber-500 hover:text-white"
-                                                    : "border-red-600 text-red-600 dark:text-red-400 hover:bg-red-600 hover:text-white"
-                                                }`}
+                                            className="text-xs font-semibold px-3 py-1.5 rounded-full border border-club/40 text-club hover:bg-club hover:text-white hover:border-club transition-colors"
                                         >
                                             {t.categories[cat.charAt(0).toUpperCase() + cat.slice(1) as keyof typeof t.categories]}
                                         </Link>
@@ -205,8 +207,7 @@ export default function HomePage() {
 
                                 <Link
                                     href={`/clubs/${club.id}`}
-                                    className="flex items-center justify-center w-full py-2.5 rounded-sm font-semibold text-sm transition-opacity hover:opacity-85 text-white"
-                                    style={{ backgroundColor: club.couleurPrimaire }}
+                                    className="flex items-center justify-center w-full py-3 rounded-full font-display font-bold text-sm transition-opacity hover:opacity-90 text-white bg-club"
                                 >
                                     {t.home.viewClub} &rarr;
                                 </Link>
@@ -216,12 +217,7 @@ export default function HomePage() {
                 </div>
             </section>
 
-            {/* ── Footer ──────────────────────────────────────── */}
-            <footer className="border-t border-border bg-muted/30 py-8 text-center text-muted-foreground text-sm">
-                <p className="font-semibold text-foreground mb-1">Guinée Football Clubs</p>
-                <p>Jaguar Académie Guinée &amp; Club Atlético de Colèah &mdash; {t.footer.city}</p>
-                <p className="mt-1 text-xs opacity-50">&copy; {new Date().getFullYear()} {t.footer.rights}</p>
-            </footer>
+            <SiteFooter />
         </div>
     );
 }

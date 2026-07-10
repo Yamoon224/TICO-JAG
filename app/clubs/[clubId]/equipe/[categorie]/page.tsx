@@ -3,8 +3,9 @@
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, type CSSProperties } from "react";
 import Navbar from "@/components/Navbar";
+import { ClubFooter } from "@/components/Footer";
 import PlayerCard from "@/components/PlayerCard";
 import {
   fetchClubBySlug,
@@ -75,6 +76,16 @@ export default function TeamPage() {
     };
   }, [params.clubId, catKey, category]);
 
+  const filtered = useMemo(() => {
+    return players.filter((p) => {
+      const fullName = `${p.prenom} ${p.nom}`.toLowerCase();
+      const matchSearch =
+        fullName.includes(search.toLowerCase()) || String(p.numero).includes(search);
+      const matchPoste = posteFilter === "Tous" || p.poste === posteFilter;
+      return matchSearch && matchPoste;
+    });
+  }, [players, search, posteFilter]);
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex flex-col">
@@ -94,7 +105,7 @@ export default function TeamPage() {
           <div className="text-center">
             <p className="text-xl font-black text-foreground mb-2">Page introuvable</p>
             {error && <p className="text-xs text-muted-foreground mb-2">{error}</p>}
-            <Link href="/" className="text-sm font-semibold hover:underline" style={{ color: "#CC0000" }}>
+            <Link href="/" className="text-sm font-semibold hover:underline text-jag">
               Retour à l&apos;accueil
             </Link>
           </div>
@@ -103,27 +114,19 @@ export default function TeamPage() {
     );
   }
 
-  const filtered = useMemo(() => {
-    return players.filter((p) => {
-      const fullName = `${p.prenom} ${p.nom}`.toLowerCase();
-      const matchSearch =
-        fullName.includes(search.toLowerCase()) || String(p.numero).includes(search);
-      const matchPoste = posteFilter === "Tous" || p.poste === posteFilter;
-      return matchSearch && matchPoste;
-    });
-  }, [players, search, posteFilter]);
-
   const categories: Array<"Cadets" | "Juniors" | "Seniors"> = ["Cadets", "Juniors", "Seniors"];
   const hasFilters = search !== "" || posteFilter !== "Tous";
+  const primaryColor = club.primary_color || "#CC0000";
+  const clubVars = { "--club": primaryColor } as CSSProperties;
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background" style={clubVars}>
       <Navbar />
 
       {/* ── Club mini-header ──────────────────────────────── */}
-      <div className="relative h-40 sm:h-52 overflow-hidden">
-        <Image src={club.hero || "/images/jag-hero.png"} alt={club.name} fill className="object-cover" priority />
-        <div className="absolute inset-0 bg-black/60" />
+      <div className="relative h-44 sm:h-56 overflow-hidden bg-[#101214]">
+        <Image src={club.hero || "/images/jag-hero.png"} alt={club.name} fill className="object-cover opacity-40" priority />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#101214] via-[#101214]/40 to-[#101214]/10" />
         <div className="absolute inset-0 flex items-center px-4 sm:px-8 gap-4">
           <Link href={`/clubs/${club.slug}`} className="shrink-0">
             <Image
@@ -131,15 +134,16 @@ export default function TeamPage() {
               alt={club.name}
               width={56}
               height={56}
-              className="rounded-full border-2 border-white shadow-lg object-cover"
+              className="rounded-full border-2 shadow-lg object-cover bg-white/10"
+              style={{ borderColor: "var(--club)" }}
             />
           </Link>
           <div className="min-w-0">
-            <p className="text-white/60 text-xs truncate">{club.name}</p>
+            <p className="text-white/50 text-xs truncate">{club.name}</p>
             <h1 className="font-display text-white font-black text-2xl sm:text-4xl leading-tight tracking-tight">
               {t.categories[category]}
             </h1>
-            <p className="text-white/50 text-xs mt-0.5">
+            <p className="text-white/40 text-xs mt-0.5 tabular-nums">
               {players.length} {t.team.players}
             </p>
           </div>
@@ -147,12 +151,12 @@ export default function TeamPage() {
       </div>
 
       {/* ── Category tabs ─────────────────────────────────── */}
-      <div className="flex" style={{ backgroundColor: club.primary_color || "#CC0000" }}>
+      <div className="flex bg-club">
         {categories.map((cat) => (
           <Link
             key={cat}
             href={`/clubs/${club.slug}/equipe/${cat.toLowerCase()}`}
-            className={`flex-1 py-2.5 text-center text-xs sm:text-sm font-semibold transition-colors border-b-2 ${
+            className={`flex-1 py-3 text-center text-xs sm:text-sm font-semibold transition-colors border-b-2 ${
               cat === category
                 ? "border-white text-white"
                 : "border-transparent text-white/50 hover:text-white"
@@ -169,18 +173,18 @@ export default function TeamPage() {
         <div className="flex flex-col sm:flex-row gap-3 mb-6">
           {/* Search */}
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={15} />
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground" size={15} />
             <input
               type="text"
               placeholder={t.team.searchPlaceholder}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-9 pr-8 py-2 rounded-sm border border-border bg-card text-foreground text-sm focus:outline-none focus:ring-1 focus:ring-border transition-colors"
+              className="w-full pl-10 pr-8 py-2.5 rounded-full border border-border bg-card text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-club transition-colors"
             />
             {search && (
               <button
                 onClick={() => setSearch("")}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
               >
                 <X size={14} />
               </button>
@@ -196,14 +200,11 @@ export default function TeamPage() {
                 <button
                   key={p}
                   onClick={() => setPosteFilter(p)}
-                  className={`px-3 py-1.5 rounded-sm text-xs font-semibold border transition-colors ${
-                    isActive ? "" : "border-border text-muted-foreground hover:text-foreground hover:border-foreground/30"
-                  }`}
-                  style={
+                  className={`px-3.5 py-1.5 rounded-full text-xs font-semibold border transition-colors ${
                     isActive
-                      ? { backgroundColor: club.primary_color || "#CC0000", color: "#fff", borderColor: club.primary_color || "#CC0000" }
-                      : {}
-                  }
+                      ? "bg-club text-white border-club"
+                      : "border-border text-muted-foreground hover:text-foreground hover:border-foreground/30"
+                  }`}
                 >
                   {label}
                 </button>
@@ -223,7 +224,7 @@ export default function TeamPage() {
         {filtered.length > 0 ? (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 md:gap-4">
             {filtered.map((player) => (
-              <PlayerCard key={player.id} player={player} primaryColor={club.primary_color || "#CC0000"} />
+              <PlayerCard key={player.id} player={player} primaryColor={primaryColor} />
             ))}
           </div>
         ) : (
@@ -231,8 +232,7 @@ export default function TeamPage() {
             <p className="text-muted-foreground text-base mb-3">{t.team.noPlayer}</p>
             <button
               onClick={() => { setSearch(""); setPosteFilter("Tous"); }}
-              className="text-xs font-semibold hover:underline"
-              style={{ color: club.primary_color || "#CC0000" }}
+              className="text-xs font-semibold hover:underline text-club"
             >
               {t.team.resetFilters}
             </button>
@@ -240,11 +240,18 @@ export default function TeamPage() {
         )}
       </div>
 
-      {/* ── Footer ───────────────────────────────────────── */}
-      <footer className="border-t border-border bg-muted/30 py-8 text-center text-muted-foreground text-sm">
-        <p className="font-semibold text-foreground mb-1">{club.name}</p>
-        <p>{club.city || "-"}</p>
-      </footer>
+      <ClubFooter
+        clubId={club.slug}
+        club={{
+          nom: club.name,
+          acronyme: club.acronym ?? club.name,
+          logo: club.logo || "/images/jag-logo.png",
+          hero: club.hero || "/images/jag-hero.png",
+          color: primaryColor,
+          colorDark: club.secondary_color || "#8F0000",
+          social: club.social,
+        }}
+      />
     </div>
   );
 }

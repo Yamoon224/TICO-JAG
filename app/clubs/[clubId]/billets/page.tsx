@@ -3,7 +3,8 @@
 import { use, useEffect, useState } from "react";
 import Navbar from "@/components/Navbar";
 import { ClubPageHero } from "@/components/ClubPageHero";
-import { useClubBrand } from "@/lib/club-brand";
+import { ClubFooter } from "@/components/Footer";
+import { useClubBrand, clubVars } from "@/lib/club-brand";
 import { useLocale } from "@/lib/locale-context";
 import { MapPin, CalendarDays, Ticket } from "lucide-react";
 import { fetchClubBillets, type MatchBillets } from "@/lib/api";
@@ -41,7 +42,7 @@ export default function BilletsPage({ params }: { params: Promise<{ clubId: stri
   }, [clubId]);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background" style={clubVars(club)}>
       <Navbar />
 
       <ClubPageHero clubId={clubId} club={club} label={locale === "fr" ? "Billets" : "Tickets"} />
@@ -110,9 +111,7 @@ export default function BilletsPage({ params }: { params: Promise<{ clubId: stri
         )}
       </div>
 
-      <footer className="border-t border-border bg-muted/30 py-6 text-center text-muted-foreground text-sm">
-        <p className="font-semibold text-foreground">{club.nom}</p>
-      </footer>
+      <ClubFooter clubId={clubId} club={club} />
     </div>
   );
 }

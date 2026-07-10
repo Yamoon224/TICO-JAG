@@ -3,7 +3,8 @@
 import { use, useEffect, useState } from "react";
 import Navbar from "@/components/Navbar";
 import { ClubPageHero } from "@/components/ClubPageHero";
-import { useClubBrand } from "@/lib/club-brand";
+import { ClubFooter } from "@/components/Footer";
+import { useClubBrand, clubVars } from "@/lib/club-brand";
 import { fetchClubStandings, type StandingEntry, type StandingGroup } from "@/lib/api";
 import { useLocale } from "@/lib/locale-context";
 
@@ -42,8 +43,8 @@ export default function ClassementPage({ params }: { params: Promise<{ clubId: s
         };
     }, [clubId]);
 
-    const th = "text-xs font-semibold text-muted-foreground px-2 py-2 text-center";
-    const td = "text-sm text-center px-2 py-3";
+    const th = "text-xs font-semibold text-muted-foreground px-2 py-2.5 text-center";
+    const td = "text-sm text-center px-2 py-3 tabular-nums";
     const renderStat = (value?: number) => (typeof value === "number" ? value : "-");
     const renderGd = (e: StandingEntry) => {
         if (typeof e.gd === "number") return e.gd;
@@ -52,7 +53,7 @@ export default function ClassementPage({ params }: { params: Promise<{ clubId: s
     };
 
     return (
-        <div className="min-h-screen bg-background">
+        <div className="min-h-screen bg-background" style={clubVars(club)}>
             <Navbar />
 
             <ClubPageHero clubId={clubId} club={club} label={locale === "fr" ? "Classement" : "Standings"} />
@@ -60,12 +61,12 @@ export default function ClassementPage({ params }: { params: Promise<{ clubId: s
             {/* Group tabs */}
             {groupes.length > 1 && (
                 <div className="border-b border-border bg-card">
-                    <div className="max-w-5xl mx-auto px-4 sm:px-6 flex gap-1 py-2 overflow-x-auto">
+                    <div className="max-w-5xl mx-auto px-4 sm:px-6 flex gap-1.5 py-2.5 overflow-x-auto">
                         {groupes.map((g, i) => (
                             <button key={i} onClick={() => setActiveIdx(i)}
-                                className={`px-4 py-1.5 rounded-sm text-sm font-semibold whitespace-nowrap transition-colors ${activeIdx === i ? "text-white" : "text-muted-foreground hover:text-foreground"
-                                    }`}
-                                style={activeIdx === i ? { backgroundColor: club.color } : {}}>
+                                className={`px-4 py-1.5 rounded-full text-sm font-semibold whitespace-nowrap transition-colors ${
+                                    activeIdx === i ? "text-white bg-club" : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                                }`}>
                                 {g.categorie}
                             </button>
                         ))}
@@ -85,7 +86,8 @@ export default function ClassementPage({ params }: { params: Promise<{ clubId: s
                             <span className="text-sm text-muted-foreground">{locale === "fr" ? `Saison ${groupe.saison}` : `Season ${groupe.saison}`}</span>
                         </div>
 
-                        <div className="overflow-x-auto bg-card border border-border rounded-sm">
+                        {/* Desktop / tablet table */}
+                        <div className="hidden sm:block overflow-x-auto bg-card border border-border rounded-2xl">
                             <table className="w-full">
                                 <thead>
                                     <tr className="border-b border-border">
@@ -104,17 +106,15 @@ export default function ClassementPage({ params }: { params: Promise<{ clubId: s
                                 <tbody>
                                     {groupe.entrees.map((e) => (
                                         <tr key={e.position}
-                                            className={`border-b border-border last:border-0 ${e.isClub ? "font-bold" : ""
-                                                }`}
-                                            style={e.isClub ? { backgroundColor: `${club.color}15` } : {}}>
-                                            <td className={`${td} pl-4 font-black`} style={e.isClub ? { color: club.color } : {}}>{e.position}</td>
-                                            <td className={`${td} text-left font-semibold text-foreground`}>
-                                                {e.isClub ? <span style={{ color: club.color }}>{e.equipe}</span> : e.equipe}
+                                            className={`border-b border-border last:border-0 ${e.isClub ? "font-bold bg-club/[0.06]" : ""}`}>
+                                            <td className={`${td} pl-4 font-black ${e.isClub ? "text-club" : ""}`}>{e.position}</td>
+                                            <td className={`${td} text-left font-semibold text-foreground ${e.isClub ? "text-club" : ""}`}>
+                                                {e.equipe}
                                             </td>
                                             <td className={td}>{renderStat(e.joues)}</td>
-                                            <td className={`${td} text-green-600`}>{renderStat(e.victoires)}</td>
-                                            <td className={`${td} text-amber-500`}>{renderStat(e.nuls)}</td>
-                                            <td className={`${td} text-red-500`}>{renderStat(e.defaites)}</td>
+                                            <td className={`${td} text-emerald-600 dark:text-emerald-400`}>{renderStat(e.victoires)}</td>
+                                            <td className={`${td} text-amber-600 dark:text-amber-400`}>{renderStat(e.nuls)}</td>
+                                            <td className={`${td} text-red-600 dark:text-red-400`}>{renderStat(e.defaites)}</td>
                                             <td className={td}>{renderStat(e.butsPour)}</td>
                                             <td className={td}>{renderStat(e.butsContre)}</td>
                                             <td className={td}>{renderGd(e)}</td>
@@ -124,13 +124,39 @@ export default function ClassementPage({ params }: { params: Promise<{ clubId: s
                                 </tbody>
                             </table>
                         </div>
+
+                        {/* Mobile stacked cards */}
+                        <div className="sm:hidden flex flex-col gap-2">
+                            {groupe.entrees.map((e) => (
+                                <div
+                                    key={e.position}
+                                    className={`bg-card border border-border rounded-xl px-3.5 py-3 ${e.isClub ? "border-club bg-club/[0.06]" : ""}`}
+                                >
+                                    <div className="flex items-center gap-3">
+                                        <span className={`font-display font-black text-lg w-6 text-center tabular-nums ${e.isClub ? "text-club" : "text-muted-foreground"}`}>
+                                            {e.position}
+                                        </span>
+                                        <span className={`flex-1 min-w-0 font-semibold text-sm truncate ${e.isClub ? "text-club" : "text-foreground"}`}>
+                                            {e.equipe}
+                                        </span>
+                                        <span className="font-display font-black text-foreground text-lg tabular-nums shrink-0">{e.points}</span>
+                                        <span className="text-[10px] text-muted-foreground uppercase shrink-0">pts</span>
+                                    </div>
+                                    <div className="flex items-center gap-3 mt-2 pl-9 text-xs text-muted-foreground tabular-nums">
+                                        <span>{renderStat(e.joues)} J</span>
+                                        <span className="text-emerald-600 dark:text-emerald-400">{renderStat(e.victoires)} V</span>
+                                        <span className="text-amber-600 dark:text-amber-400">{renderStat(e.nuls)} N</span>
+                                        <span className="text-red-600 dark:text-red-400">{renderStat(e.defaites)} D</span>
+                                        <span>{renderGd(e)} GD</span>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
                     </>
                 )}
             </div>
 
-            <footer className="border-t border-border bg-muted/30 py-6 text-center text-muted-foreground text-sm">
-                <p className="font-semibold text-foreground">{club.nom}</p>
-            </footer>
+            <ClubFooter clubId={clubId} club={club} />
         </div>
     );
 }

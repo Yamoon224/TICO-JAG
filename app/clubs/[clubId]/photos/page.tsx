@@ -4,10 +4,11 @@ import { use, useEffect, useState } from "react";
 import Image from "next/image";
 import Navbar from "@/components/Navbar";
 import { ClubPageHero } from "@/components/ClubPageHero";
-import { useClubBrand } from "@/lib/club-brand";
+import { ClubFooter } from "@/components/Footer";
+import { useClubBrand, clubVars } from "@/lib/club-brand";
 import { fetchClubGallery, type ClubGalleryPhoto } from "@/lib/api";
 import { useLocale } from "@/lib/locale-context";
-import { X } from "lucide-react";
+import { ChevronLeft, ChevronRight, X } from "lucide-react";
 
 const PAGE_SIZE = 9;
 
@@ -17,7 +18,7 @@ export default function PhotosPage({ params }: { params: Promise<{ clubId: strin
   const club = useClubBrand(clubId);
   const [photos, setPhotos] = useState<ClubGalleryPhoto[]>([]);
   const [loading, setLoading] = useState(true);
-  const [lightbox, setLightbox] = useState<ClubGalleryPhoto | null>(null);
+  const [lightboxIdx, setLightboxIdx] = useState<number | null>(null);
   const [page, setPage] = useState(1);
 
   useEffect(() => {
@@ -50,9 +51,10 @@ export default function PhotosPage({ params }: { params: Promise<{ clubId: strin
 
   const totalPages = Math.max(1, Math.ceil(photos.length / PAGE_SIZE));
   const paginatedPhotos = photos.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+  const lightbox = lightboxIdx !== null ? paginatedPhotos[lightboxIdx] : null;
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background" style={clubVars(club)}>
       <Navbar />
 
       <ClubPageHero clubId={clubId} club={club} label={locale === "fr" ? "Galerie photos" : "Photo gallery"} dim={false} />
@@ -65,12 +67,11 @@ export default function PhotosPage({ params }: { params: Promise<{ clubId: strin
         ) : (
           <>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
-              {paginatedPhotos.map((p) => (
+              {paginatedPhotos.map((p, i) => (
                 <button
                   key={p.id}
-                  onClick={() => setLightbox(p)}
-                  className="group relative aspect-video bg-muted rounded-sm overflow-hidden focus:outline-none focus:ring-2"
-                  style={{ ['--tw-ring-color' as string]: club.color }}
+                  onClick={() => setLightboxIdx(i)}
+                  className="group relative aspect-video bg-muted rounded-xl overflow-hidden focus:outline-none focus:ring-2 focus:ring-club"
                 >
                   <Image src={p.url} alt={p.legende ?? ""} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
                   <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors" />
@@ -89,17 +90,17 @@ export default function PhotosPage({ params }: { params: Promise<{ clubId: strin
               <button
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
                 disabled={page === 1}
-                className="px-3 py-1.5 rounded border border-border hover:bg-muted disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                className="px-4 py-2 rounded-full border border-border hover:bg-muted disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
               >
                 {locale === "fr" ? "Précédent" : "Previous"}
               </button>
-              <span className="text-muted-foreground">
+              <span className="text-muted-foreground tabular-nums">
                 {page} / {totalPages}
               </span>
               <button
                 onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                 disabled={page === totalPages}
-                className="px-3 py-1.5 rounded border border-border hover:bg-muted disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                className="px-4 py-2 rounded-full border border-border hover:bg-muted disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
               >
                 {locale === "fr" ? "Suivant" : "Next"}
               </button>
@@ -109,22 +110,41 @@ export default function PhotosPage({ params }: { params: Promise<{ clubId: strin
       </div>
 
       {/* Lightbox */}
-      {lightbox && (
+      {lightbox && lightboxIdx !== null && (
         <div
           className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4"
-          onClick={() => setLightbox(null)}
+          onClick={() => setLightboxIdx(null)}
         >
           <button
             className="absolute top-4 right-4 text-white/70 hover:text-white"
-            onClick={() => setLightbox(null)}
+            onClick={() => setLightboxIdx(null)}
+            aria-label="Fermer"
           >
             <X size={28} />
           </button>
+          {lightboxIdx > 0 && (
+            <button
+              className="absolute left-2 sm:left-6 text-white/60 hover:text-white p-2"
+              onClick={(e) => { e.stopPropagation(); setLightboxIdx(lightboxIdx - 1); }}
+              aria-label="Précédent"
+            >
+              <ChevronLeft size={32} />
+            </button>
+          )}
+          {lightboxIdx < paginatedPhotos.length - 1 && (
+            <button
+              className="absolute right-2 sm:right-6 text-white/60 hover:text-white p-2"
+              onClick={(e) => { e.stopPropagation(); setLightboxIdx(lightboxIdx + 1); }}
+              aria-label="Suivant"
+            >
+              <ChevronRight size={32} />
+            </button>
+          )}
           <div className="relative max-w-3xl w-full max-h-[80vh] aspect-video" onClick={(e) => e.stopPropagation()}>
             <Image src={lightbox.url} alt={lightbox.legende ?? ""} fill className="object-contain" />
           </div>
           {lightbox.legende && (
-            <div className="absolute bottom-6 left-0 right-0 text-center">
+            <div className="absolute bottom-6 left-0 right-0 text-center px-4">
               <p className="text-white font-semibold text-sm">{lightbox.legende}</p>
               {lightbox.categorie && <p className="text-white/60 text-xs mt-0.5">{lightbox.categorie}</p>}
             </div>
@@ -132,9 +152,7 @@ export default function PhotosPage({ params }: { params: Promise<{ clubId: strin
         </div>
       )}
 
-      <footer className="border-t border-border bg-muted/30 py-6 text-center text-muted-foreground text-sm">
-        <p className="font-semibold text-foreground">{club.nom}</p>
-      </footer>
+      <ClubFooter clubId={clubId} club={club} />
     </div>
   );
 }

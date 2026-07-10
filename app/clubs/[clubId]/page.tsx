@@ -1,13 +1,13 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import Navbar from "@/components/Navbar";
+import { ClubFooter } from "@/components/Footer";
 import { fetchClubBySlug, type ClubApiModel } from "@/lib/api";
 import { useLocale } from "@/lib/locale-context";
-import { Facebook, Youtube } from "lucide-react";
 
 const CATEGORIES = ["Cadets", "Juniors", "Seniors"] as const;
 
@@ -97,7 +97,7 @@ export default function ClubPage() {
           <div className="text-center">
             <p className="text-xl font-black text-foreground mb-2">Club introuvable</p>
             {error && <p className="text-xs text-muted-foreground mb-2">{error}</p>}
-            <Link href="/" className="text-sm font-semibold hover:underline" style={{ color: "#CC0000" }}>
+            <Link href="/" className="text-sm font-semibold hover:underline text-jag">
               Retour à l&apos;accueil
             </Link>
           </div>
@@ -106,50 +106,53 @@ export default function ClubPage() {
     );
   }
 
+  const clubVars = { "--club": club.primary_color || "#CC0000" } as CSSProperties;
+
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background" style={clubVars}>
       <Navbar />
 
       {/* ── Hero banner ──────────────────────────────────── */}
-      <section className="relative h-56 sm:h-72 md:h-88 overflow-hidden">
-        <Image src={club.hero || "/images/jag-hero.png"} alt={club.name} fill className="object-cover" priority />
-        <div className="absolute inset-0 bg-black/55" />
-        <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-4 gap-3">
+      <section className="relative h-64 sm:h-80 md:h-96 overflow-hidden bg-[#101214]">
+        <Image src={club.hero || "/images/jag-hero.png"} alt={club.name} fill className="object-cover opacity-60" priority />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#101214] via-[#101214]/40 to-[#101214]/10" />
+        <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-4 gap-3.5">
           <Image
             src={club.logo || "/images/jag-logo.png"}
             alt={club.name}
-            width={72}
-            height={72}
-            className="rounded-full border-4 border-white shadow-xl object-cover"
+            width={76}
+            height={76}
+            className="rounded-full border-4 shadow-xl object-cover bg-white/10"
+            style={{ borderColor: "var(--club)" }}
           />
-          <h1 className="font-display text-white font-black text-2xl sm:text-4xl md:text-5xl text-balance leading-tight tracking-tight">
+          <h1 className="font-display text-white font-black text-3xl sm:text-4xl md:text-5xl text-balance leading-[1.05] tracking-tight">
             {club.name}
           </h1>
-          <p className="text-white/60 text-sm">
+          <p className="text-white/55 text-sm">
             {t.club.founded} {formatFoundedDate(club.founded_at)} &mdash; {club.city || "-"}
           </p>
         </div>
       </section>
 
-      {/* ── Stats bar ────────────────────────────────────── */}
-      <div className="grid grid-cols-2 sm:grid-cols-4" style={{ backgroundColor: club.primary_color || "#CC0000" }}>
+      {/* ── Scoreboard stats strip ──────────────────────────── */}
+      <div className="scoreboard-tile grid grid-cols-2 sm:grid-cols-4 max-w-5xl mx-auto sm:rounded-b-2xl overflow-hidden">
         {[
           { label: "Cadets", value: String(teamCount.Cadets) },
           { label: "Juniors", value: String(teamCount.Juniors) },
           { label: "Seniors", value: String(teamCount.Seniors) },
           { label: t.club.ourTeams, value: String((club.teams ?? []).length) },
-        ].map((s) => (
-          <div key={s.label} className="py-4 text-center border-r border-white/20 last:border-0">
-            <p className="font-display font-black text-xl md:text-2xl text-white leading-tight">{s.value}</p>
-            <p className="text-white/70 text-xs uppercase tracking-wide mt-0.5">{s.label}</p>
+        ].map((s, i) => (
+          <div key={s.label} className={`py-4 sm:py-5 text-center border-white/10 ${i % 2 === 0 ? "border-r" : "sm:border-r"} ${i < 2 ? "border-b sm:border-b-0" : ""} last:border-r-0`}>
+            <p className="font-display font-black text-2xl md:text-3xl text-club leading-tight tabular-nums">{s.value}</p>
+            <p className="text-white/50 text-[11px] uppercase tracking-wide mt-1">{s.label}</p>
           </div>
         ))}
       </div>
 
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 py-12 md:py-16">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 py-14 md:py-18">
 
         {/* ── About ────────────────────────────────────────── */}
-        <section className="mb-12">
+        <section className="mb-14">
           <h2 className="font-display text-lg md:text-xl font-black text-foreground mb-3 tracking-tight">
             {t.club.about}
           </h2>
@@ -170,24 +173,18 @@ export default function ClubPage() {
                 <Link
                   key={cat}
                   href={`/clubs/${club.slug}/equipe/${cat.toLowerCase()}`}
-                  className="group block bg-card border border-border rounded-sm p-5 hover:shadow-md transition-shadow"
+                  className="group block bg-card border border-border rounded-2xl p-5 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200"
                 >
-                  <div
-                    className="w-10 h-10 rounded-sm flex items-center justify-center mb-4 font-black text-base text-white"
-                    style={{ backgroundColor: club.primary_color || "#CC0000" }}
-                  >
+                  <div className="w-11 h-11 rounded-xl flex items-center justify-center mb-4 font-display font-black text-base text-white bg-club">
                     {cat[0]}
                   </div>
                   <h3 className="font-display font-black text-foreground text-base mb-1">
                     {t.categories[cat]}
                   </h3>
-                  <p className="text-muted-foreground text-sm mb-4">
+                  <p className="text-muted-foreground text-sm mb-4 tabular-nums">
                     {playersCount} {t.club.players}
                   </p>
-                  <span
-                    className="text-xs font-semibold group-hover:underline"
-                    style={{ color: club.primary_color || "#CC0000" }}
-                  >
+                  <span className="text-xs font-semibold text-club group-hover:underline">
                     {t.club.viewTeam} &rarr;
                   </span>
                 </Link>
@@ -197,37 +194,18 @@ export default function ClubPage() {
         </section>
       </div>
 
-      {/* ── Footer ───────────────────────────────────────── */}
-      <footer className="border-t border-border bg-muted/30 py-8 text-center text-muted-foreground text-sm">
-        <p className="font-semibold text-foreground mb-1">{club.name}</p>
-        <p>{club.city || "-"} &mdash; {t.club.founded} {formatFoundedDate(club.founded_at)}</p>
-        {club.social && (
-          <div className="flex items-center justify-center gap-4 mt-4">
-            {club.social.facebook && (
-              <a
-                href={club.social.facebook}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-1.5 text-xs font-semibold hover:text-foreground transition-colors"
-                style={{ color: club.primary_color || "#CC0000" }}
-              >
-                <Facebook size={16} /> Facebook
-              </a>
-            )}
-            {club.social.youtube && (
-              <a
-                href={club.social.youtube}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-1.5 text-xs font-semibold hover:text-foreground transition-colors"
-                style={{ color: club.primary_color || "#CC0000" }}
-              >
-                <Youtube size={16} /> YouTube
-              </a>
-            )}
-          </div>
-        )}
-      </footer>
+      <ClubFooter
+        clubId={club.slug}
+        club={{
+          nom: club.name,
+          acronyme: club.acronym ?? club.name,
+          logo: club.logo || "/images/jag-logo.png",
+          hero: club.hero || "/images/jag-hero.png",
+          color: club.primary_color || "#CC0000",
+          colorDark: club.secondary_color || "#8F0000",
+          social: club.social,
+        }}
+      />
     </div>
   );
 }

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
 import { fetchClubBySlug } from "@/lib/api";
 
 export type ClubBrand = {
@@ -8,6 +8,7 @@ export type ClubBrand = {
   hero: string;
   color: string;
   colorDark: string;
+  social?: { facebook?: string; youtube?: string };
 };
 
 function shade(hex: string, amount: number): string {
@@ -37,6 +38,11 @@ export const CLUB_FALLBACK: Record<string, ClubBrand> = {
   },
 };
 
+/** CSS custom properties carrying the active club's color, for `var(--club)` / `.text-club` / `.bg-club` utilities. */
+export function clubVars(brand: Pick<ClubBrand, "color" | "colorDark">): CSSProperties {
+  return { "--club": brand.color, "--club-dark": brand.colorDark } as CSSProperties;
+}
+
 /** Returns club branding instantly from a static fallback, then refreshes from the API. */
 export function useClubBrand(clubSlug: string): ClubBrand {
   const fallback = CLUB_FALLBACK[clubSlug] ?? CLUB_FALLBACK.jag;
@@ -57,6 +63,7 @@ export function useClubBrand(clubSlug: string): ClubBrand {
         hero: club.hero || base.hero,
         color,
         colorDark: club.secondary_color || shade(color, -40),
+        social: club.social,
       });
     });
 

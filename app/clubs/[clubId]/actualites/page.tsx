@@ -4,7 +4,8 @@ import { use, useEffect, useState } from "react";
 import Image from "next/image";
 import Navbar from "@/components/Navbar";
 import { ClubPageHero } from "@/components/ClubPageHero";
-import { useClubBrand } from "@/lib/club-brand";
+import { ClubFooter } from "@/components/Footer";
+import { useClubBrand, clubVars } from "@/lib/club-brand";
 import { fetchClubArticles, type NewsArticle } from "@/lib/api";
 import { useLocale } from "@/lib/locale-context";
 import { CalendarDays } from "lucide-react";
@@ -48,7 +49,7 @@ export default function ActualitesPage({ params }: { params: Promise<{ clubId: s
   const orderedArticles = [...articles].sort((a, b) => b.datePublication.localeCompare(a.datePublication));
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background" style={clubVars(club)}>
       <Navbar />
 
       <ClubPageHero clubId={clubId} club={club} label={locale === "fr" ? "Actualités" : "News"} />
@@ -66,19 +67,18 @@ export default function ActualitesPage({ params }: { params: Promise<{ clubId: s
 
         <div className="grid sm:grid-cols-2 gap-5">
           {orderedArticles.map((a, i) => (
-            <article key={a.id} className={`bg-card border border-border rounded-sm overflow-hidden hover:shadow-md transition-shadow ${
+            <article key={a.id} className={`bg-card border border-border rounded-2xl overflow-hidden hover:shadow-lg transition-shadow ${
               i === 0 ? "sm:col-span-2" : ""
             }`}>
               {a.image && (
                 <div className={`relative bg-muted overflow-hidden ${
-                  i === 0 ? "h-52 sm:h-72" : "h-40"
+                  i === 0 ? "h-56 sm:h-80" : "h-40"
                 }`}>
                   <Image src={a.image} alt={a.titre} fill className="object-cover" />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                  <span
-                    className="absolute top-3 left-3 text-white text-[10px] font-black px-2 py-0.5 rounded-sm"
-                    style={{ backgroundColor: club.color }}
-                  >{a.categorie}</span>
+                  <span className="absolute top-3 left-3 text-white text-[10px] font-black px-2.5 py-1 rounded-full bg-club">
+                    {a.categorie}
+                  </span>
                 </div>
               )}
               <div className="p-4 sm:p-5">
@@ -96,9 +96,7 @@ export default function ActualitesPage({ params }: { params: Promise<{ clubId: s
         </div>
       </div>
 
-      <footer className="border-t border-border bg-muted/30 py-6 text-center text-muted-foreground text-sm">
-        <p className="font-semibold text-foreground">{club.nom}</p>
-      </footer>
+      <ClubFooter clubId={clubId} club={club} />
     </div>
   );
 }

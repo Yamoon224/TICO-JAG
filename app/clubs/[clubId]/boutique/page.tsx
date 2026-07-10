@@ -4,7 +4,8 @@ import { use, useEffect, useState } from "react";
 import Image from "next/image";
 import Navbar from "@/components/Navbar";
 import { ClubPageHero } from "@/components/ClubPageHero";
-import { useClubBrand } from "@/lib/club-brand";
+import { ClubFooter } from "@/components/Footer";
+import { useClubBrand, clubVars } from "@/lib/club-brand";
 import { fetchClubProducts, type ShopProduct } from "@/lib/api";
 import { useLocale } from "@/lib/locale-context";
 import { ShoppingBag, Truck, RotateCcw, ShieldCheck, Star } from "lucide-react";
@@ -54,7 +55,7 @@ export default function BoutiquePage({ params }: { params: Promise<{ clubId: str
   const filtered = activeCategory === "all" ? products : products.filter((p) => p.category === activeCategory);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background" style={clubVars(club)}>
       <Navbar />
 
       <ClubPageHero clubId={clubId} club={club} label={t.shop.title} />
@@ -162,12 +163,7 @@ export default function BoutiquePage({ params }: { params: Promise<{ clubId: str
         </div>
       </div>
 
-      {/* Footer */}
-      <footer className="border-t border-border bg-muted/30 py-6 text-center text-muted-foreground text-sm mt-10">
-        <p className="font-semibold text-foreground mb-1">Guinée Football Clubs</p>
-        <p>Jaguar Académie Guinée &amp; Club Atlético de Colèah &mdash; {t.footer.city}</p>
-        <p className="mt-1 text-xs opacity-50">&copy; {new Date().getFullYear()} {t.footer.rights}</p>
-      </footer>
+      <ClubFooter clubId={clubId} club={club} />
     </div>
   );
 }

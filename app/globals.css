@@ -4,84 +4,90 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  /* ── Light theme ─────────────────────────────── */
-  --background:         oklch(0.98 0 0);
-  --foreground:         oklch(0.10 0 0);
-  --card:               oklch(1 0 0);
-  --card-foreground:    oklch(0.10 0 0);
-  --popover:            oklch(1 0 0);
-  --popover-foreground: oklch(0.10 0 0);
-  --primary:            oklch(0.10 0 0);
-  --primary-foreground: oklch(0.98 0 0);
-  --secondary:          oklch(0.95 0 0);
-  --secondary-foreground: oklch(0.20 0 0);
-  --muted:              oklch(0.94 0 0);
-  --muted-foreground:   oklch(0.50 0 0);
-  --accent:             oklch(0.94 0 0);
-  --accent-foreground:  oklch(0.20 0 0);
-  --destructive:        oklch(0.577 0.245 27.325);
-  --destructive-foreground: oklch(0.985 0 0);
-  --border:             oklch(0.88 0 0);
-  --input:              oklch(0.88 0 0);
-  --ring:               oklch(0.50 0 0);
-  --radius:             0.375rem;
+  /* ── Light theme — warm stadium-concrete neutrals ────────── */
+  --background:         #F6F5F1;
+  --foreground:         #14171A;
+  --card:               #FFFFFF;
+  --card-foreground:    #14171A;
+  --popover:            #FFFFFF;
+  --popover-foreground: #14171A;
+  --primary:            #14171A;
+  --primary-foreground: #F6F5F1;
+  --secondary:          #ECE9E3;
+  --secondary-foreground: #2B2F33;
+  --muted:              #EDEAE4;
+  --muted-foreground:   #6B6F73;
+  --accent:             #ECE9E3;
+  --accent-foreground:  #2B2F33;
+  --destructive:        #C4291A;
+  --destructive-foreground: #FBF7F0;
+  --border:             #E2DFD7;
+  --input:              #E2DFD7;
+  --ring:               #14171A;
+  --radius:             0.75rem;
 
-  /* chart colors */
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
+  /* club identity (kept for reference; pages inject the live --club/--club-dark) */
+  --jag:                #CC0000;
+  --jag-dark:            #8F0000;
+  --atletico:           #E8AC00;
+  --atletico-dark:      #A67900;
+  --pitch:              #167A42;
+  --pitch-dark:         #0E5A2F;
 
-  /* sidebar */
-  --sidebar:                  oklch(0.98 0 0);
-  --sidebar-foreground:       oklch(0.10 0 0);
-  --sidebar-primary:          oklch(0.10 0 0);
-  --sidebar-primary-foreground: oklch(0.98 0 0);
-  --sidebar-accent:           oklch(0.94 0 0);
-  --sidebar-accent-foreground: oklch(0.20 0 0);
-  --sidebar-border:           oklch(0.88 0 0);
-  --sidebar-ring:             oklch(0.50 0 0);
+  /* chart colors — tied to brand */
+  --chart-1: #CC0000;
+  --chart-2: #E8AC00;
+  --chart-3: #167A42;
+  --chart-4: #2563EB;
+  --chart-5: #7C3AED;
+
+  /* sidebar (admin) — deliberately dark regardless of site theme */
+  --sidebar:                  #12141A;
+  --sidebar-foreground:       #F2F1EE;
+  --sidebar-primary:          #167A42;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent:           #1B2A22;
+  --sidebar-accent-foreground: #F2F1EE;
+  --sidebar-border:           #24272C;
+  --sidebar-ring:             #167A42;
 }
 
 .dark {
-  /* ── Dark theme ──────────────────────────────── */
-  --background:         oklch(0.12 0 0);
-  --foreground:         oklch(0.96 0 0);
-  --card:               oklch(0.17 0 0);
-  --card-foreground:    oklch(0.96 0 0);
-  --popover:            oklch(0.17 0 0);
-  --popover-foreground: oklch(0.96 0 0);
-  --primary:            oklch(0.96 0 0);
-  --primary-foreground: oklch(0.12 0 0);
-  --secondary:          oklch(0.24 0 0);
-  --secondary-foreground: oklch(0.96 0 0);
-  --muted:              oklch(0.22 0 0);
-  --muted-foreground:   oklch(0.62 0 0);
-  --accent:             oklch(0.22 0 0);
-  --accent-foreground:  oklch(0.96 0 0);
-  --destructive:        oklch(0.396 0.141 25.723);
-  --destructive-foreground: oklch(0.637 0.237 25.331);
-  --border:             oklch(0.26 0 0);
-  --input:              oklch(0.26 0 0);
-  --ring:               oklch(0.45 0 0);
+  /* ── Dark theme — stadium at night ───────────────────────── */
+  --background:         #101214;
+  --foreground:         #F2F1EE;
+  --card:               #17191C;
+  --card-foreground:    #F2F1EE;
+  --popover:            #17191C;
+  --popover-foreground: #F2F1EE;
+  --primary:            #F2F1EE;
+  --primary-foreground: #101214;
+  --secondary:          #1E2124;
+  --secondary-foreground: #F2F1EE;
+  --muted:              #1C1F22;
+  --muted-foreground:   #9A9DA0;
+  --accent:             #1E2124;
+  --accent-foreground:  #F2F1EE;
+  --destructive:        #E5493A;
+  --destructive-foreground: #FBF7F0;
+  --border:             #2A2D30;
+  --input:              #2A2D30;
+  --ring:               #D8D6D0;
 
-  /* chart */
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
+  --chart-1: #E5493A;
+  --chart-2: #F5C445;
+  --chart-3: #2FA968;
+  --chart-4: #5B8DEF;
+  --chart-5: #A385F0;
 
-  /* sidebar */
-  --sidebar:                  oklch(0.17 0 0);
-  --sidebar-foreground:       oklch(0.96 0 0);
-  --sidebar-primary:          oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.96 0 0);
-  --sidebar-accent:           oklch(0.24 0 0);
-  --sidebar-accent-foreground: oklch(0.96 0 0);
-  --sidebar-border:           oklch(0.26 0 0);
-  --sidebar-ring:             oklch(0.45 0 0);
+  --sidebar:                  #0C0E11;
+  --sidebar-foreground:       #F2F1EE;
+  --sidebar-primary:          #1E9155;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent:           #182720;
+  --sidebar-accent-foreground: #F2F1EE;
+  --sidebar-border:           #21242A;
+  --sidebar-ring:             #1E9155;
 }
 
 @theme inline {
@@ -113,10 +119,24 @@
   --color-chart-3:              var(--chart-3);
   --color-chart-4:              var(--chart-4);
   --color-chart-5:              var(--chart-5);
+
+  --color-jag:                  var(--jag);
+  --color-jag-dark:             var(--jag-dark);
+  --color-atletico:             var(--atletico);
+  --color-atletico-dark:        var(--atletico-dark);
+  --color-pitch:                var(--pitch);
+  --color-pitch-dark:           var(--pitch-dark);
+
+  /* dynamic per-club accent — pages set --club/--club-dark inline; falls back to ink */
+  --color-club:                 var(--club, var(--foreground));
+  --color-club-dark:            var(--club-dark, var(--foreground));
+
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 10px);
+
   --color-sidebar:                    var(--sidebar);
   --color-sidebar-foreground:         var(--sidebar-foreground);
   --color-sidebar-primary:            var(--sidebar-primary);
@@ -135,14 +155,59 @@
     @apply bg-background text-foreground;
   }
   ::selection {
-    background: color-mix(in oklch, var(--foreground) 15%, transparent);
+    background: color-mix(in oklch, var(--club, var(--foreground)) 25%, transparent);
+  }
+  :focus-visible {
+    outline: 2px solid var(--club, var(--ring));
+    outline-offset: 2px;
   }
 }
 
 @layer utilities {
-  /* Scoreboard-style numerals & headings — the site's one signature type move */
+  /* Scoreboard-style numerals & headings — the site's signature type move */
   .font-display {
     font-family: var(--font-barlow), 'Barlow', sans-serif;
     letter-spacing: -0.01em;
   }
+
+  /* A physical scoreboard/split-flap tile: near-black tile, perforated top
+     edge, tabular Barlow numerals. Used anywhere real match data (scores,
+     dates, ranks, prices) needs to read like it's lit up on a stadium board. */
+  .scoreboard-tile {
+    position: relative;
+    background: #101214;
+    color: #F2F1EE;
+    font-family: var(--font-barlow), 'Barlow', sans-serif;
+    font-variant-numeric: tabular-nums;
+  }
+  .scoreboard-tile::before {
+    content: '';
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 3px;
+    background-image: radial-gradient(circle, color-mix(in oklch, var(--club, #F2F1EE) 70%, transparent) 1px, transparent 1.4px);
+    background-size: 7px 3px;
+    background-repeat: repeat-x;
+    opacity: 0.9;
+  }
+
+  /* Ticket-stub notch: semicircular cutouts on the left/right edge, like a
+     torn admission ticket. Reserved for billets (tickets) content. */
+  .ticket-stub {
+    position: relative;
+  }
+  .ticket-stub::before,
+  .ticket-stub::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    width: 16px;
+    height: 16px;
+    background: var(--page-bg, var(--background));
+    border-radius: 999px;
+    transform: translateY(-50%);
+    z-index: 1;
+  }
+  .ticket-stub::before { left: -8px; }
+  .ticket-stub::after { right: -8px; }
 }

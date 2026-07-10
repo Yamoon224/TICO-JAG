@@ -3,7 +3,9 @@
 import { use, useEffect, useState } from "react";
 import Navbar from "@/components/Navbar";
 import { ClubPageHero } from "@/components/ClubPageHero";
-import { useClubBrand } from "@/lib/club-brand";
+import { ClubFooter } from "@/components/Footer";
+import { PageTabs } from "@/components/PageTabs";
+import { useClubBrand, clubVars } from "@/lib/club-brand";
 import { fetchClubResults, type ClubMatch as ClubMatchApi } from "@/lib/api";
 import { useLocale } from "@/lib/locale-context";
 import { MapPin } from "lucide-react";
@@ -16,7 +18,7 @@ type CatFilter = typeof CATS[number];
 function getResult(sc: number, sa: number): "V" | "N" | "D" {
   return sc > sa ? "V" : sc === sa ? "N" : "D";
 }
-const resultColors = { V: "#16a34a", N: "#ca8a04", D: "#dc2626" } as const;
+const resultColors = { V: "#1E9155", N: "#C9950A", D: "#D6301F" } as const;
 const resultLabels = { fr: { V: "Victoire", N: "Nul", D: "Défaite" }, en: { V: "Win", N: "Draw", D: "Loss" } } as const;
 
 function formatDate(dateStr: string, locale: string) {
@@ -61,25 +63,16 @@ export default function ResultatsPage({ params }: { params: Promise<{ clubId: st
   const filtered = cat === "Tous" ? orderedResults : orderedResults.filter((r) => r.categorie === cat);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background" style={clubVars(club)}>
       <Navbar />
 
       <ClubPageHero clubId={clubId} club={club} label={locale === "fr" ? "Résultats" : "Results"} />
 
-      {/* Category tabs */}
-      <div className="border-b border-border bg-card">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 flex gap-1 py-2 overflow-x-auto">
-          {CATS.map((c) => (
-            <button key={c} onClick={() => setCat(c)}
-              className={`px-4 py-1.5 rounded-sm text-sm font-semibold whitespace-nowrap transition-colors ${
-                cat === c ? "text-white" : "text-muted-foreground hover:text-foreground"
-              }`}
-              style={cat === c ? { backgroundColor: club.color } : {}}>
-              {c === "Tous" ? (locale === "fr" ? "Tous" : "All") : c}
-            </button>
-          ))}
-        </div>
-      </div>
+      <PageTabs
+        active={cat}
+        onChange={setCat}
+        options={CATS.map((c) => ({ value: c, label: c === "Tous" ? (locale === "fr" ? "Tous" : "All") : c }))}
+      />
 
       <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
         {loading && filtered.length === 0 && (
@@ -89,28 +82,24 @@ export default function ResultatsPage({ params }: { params: Promise<{ clubId: st
         {filtered.length === 0 ? (
           <p className="text-center text-muted-foreground py-16">{locale === "fr" ? "Aucun résultat." : "No results yet."}</p>
         ) : (
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-3.5">
             {filtered.map((r) => {
               const scoreClub = r.scoreClub ?? 0;
               const scoreAdv = r.scoreAdv ?? 0;
               const res = getResult(scoreClub, scoreAdv);
               return (
-                <div key={r.id} className="bg-card border border-border rounded-sm p-5 flex flex-col sm:flex-row sm:items-center gap-4">
-                  {/* Result badge */}
-                  <div className="flex items-center gap-3 shrink-0">
-                    <div className="w-10 h-10 rounded-sm flex items-center justify-center text-white text-sm font-black" style={{ backgroundColor: resultColors[res] }}>
-                      {res}
-                    </div>
-                    <span className="text-xs font-semibold" style={{ color: resultColors[res] }}>
+                <div key={r.id} className="bg-card border border-border rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center gap-4 hover:shadow-md transition-shadow">
+                  {/* Score — scoreboard tile */}
+                  <div className="scoreboard-tile flex items-center gap-3 shrink-0 rounded-xl px-4 py-3 overflow-hidden">
+                    <span className="font-display font-black text-3xl tabular-nums">{scoreClub}</span>
+                    <span className="opacity-40 font-bold">—</span>
+                    <span className="font-display font-black text-3xl tabular-nums">{scoreAdv}</span>
+                    <span
+                      className="ml-2 text-[10px] font-black px-2 py-1 rounded-md uppercase tracking-wide text-white"
+                      style={{ backgroundColor: resultColors[res] }}
+                    >
                       {resultLabels[locale as "fr" | "en"][res]}
                     </span>
-                  </div>
-
-                  {/* Score */}
-                  <div className="flex items-center gap-3 shrink-0">
-                    <span className="font-display font-black text-3xl text-foreground tabular-nums">{scoreClub}</span>
-                    <span className="text-muted-foreground font-bold">—</span>
-                    <span className="font-display font-black text-3xl text-foreground tabular-nums">{scoreAdv}</span>
                   </div>
 
                   {/* Info */}
@@ -130,9 +119,7 @@ export default function ResultatsPage({ params }: { params: Promise<{ clubId: st
         )}
       </div>
 
-      <footer className="border-t border-border bg-muted/30 py-6 text-center text-muted-foreground text-sm">
-        <p className="font-semibold text-foreground">{club.nom}</p>
-      </footer>
+      <ClubFooter clubId={clubId} club={club} />
     </div>
   );
 }
