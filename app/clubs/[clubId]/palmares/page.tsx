@@ -54,22 +54,22 @@ export default function PalmaresPage({ params }: { params: Promise<{ clubId: str
         ) : palmares.length === 0 ? (
           <p className="text-center text-muted-foreground py-16">{locale === "fr" ? "Palmarès à venir." : "No honours yet."}</p>
         ) : (
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-px bg-border">
             {palmares.map((p) => (
-              <div key={p.id} className="bg-card border border-border rounded-2xl p-5 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200">
+              <div key={p.id} className="bg-card p-5 hover:bg-club/[0.04] transition-colors duration-200">
                 <div className="flex items-start gap-3 mb-3">
                   <div
-                    className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0"
+                    className="w-12 h-12 flex items-center justify-center shrink-0"
                     style={{ backgroundColor: `${getRangColor(p.rang)}18`, border: `1.5px solid ${getRangColor(p.rang)}40` }}
                   >
                     {getRangIcon(p.rang)}
                   </div>
                   <div className="min-w-0">
-                    <p className="font-display font-black text-xl tabular-nums" style={{ color: getRangColor(p.rang) }}>{p.annee}</p>
-                    <p className="text-xs font-bold uppercase tracking-wide" style={{ color: getRangColor(p.rang) }}>{p.rang}</p>
+                    <p className="font-display font-black text-2xl tabular-nums leading-none" style={{ color: getRangColor(p.rang) }}>{p.annee}</p>
+                    <p className="text-xs font-bold uppercase tracking-wide mt-1" style={{ color: getRangColor(p.rang) }}>{p.rang}</p>
                   </div>
                 </div>
-                <h3 className="font-display font-black text-foreground text-sm leading-tight mb-1.5">{p.competition}</h3>
+                <h3 className="font-display font-black text-foreground text-base uppercase leading-tight mb-1.5">{p.competition}</h3>
                 {p.description && (
                   <p className="text-xs text-muted-foreground leading-relaxed">{p.description}</p>
                 )}

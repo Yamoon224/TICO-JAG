@@ -124,9 +124,9 @@ export default function TeamPage() {
       <Navbar />
 
       {/* ── Club mini-header ──────────────────────────────── */}
-      <div className="relative h-44 sm:h-56 overflow-hidden bg-[#101214]">
-        <Image src={club.hero || "/images/jag-hero.png"} alt={club.name} fill className="object-cover opacity-40" priority />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#101214] via-[#101214]/40 to-[#101214]/10" />
+      <div className="relative h-44 sm:h-56 overflow-hidden bg-[#0C0E11]">
+        <Image src={club.hero || "/images/jag-hero.png"} alt={club.name} fill className="object-cover opacity-35" priority />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#0C0E11] via-[#0C0E11]/45 to-[#0C0E11]/10" />
         <div className="absolute inset-0 flex items-center px-4 sm:px-8 gap-4">
           <Link href={`/clubs/${club.slug}`} className="shrink-0">
             <Image
@@ -139,15 +139,16 @@ export default function TeamPage() {
             />
           </Link>
           <div className="min-w-0">
-            <p className="text-white/50 text-xs truncate">{club.name}</p>
-            <h1 className="font-display text-white font-black text-2xl sm:text-4xl leading-tight tracking-tight">
+            <p className="eyebrow text-white/60 mb-1 truncate" style={{ color: "var(--club)" }}>{club.name}</p>
+            <h1 className="font-display text-white font-black text-3xl sm:text-5xl uppercase leading-[0.95] tracking-tight">
               {t.categories[category]}
             </h1>
-            <p className="text-white/40 text-xs mt-0.5 tabular-nums">
+            <p className="text-white/40 text-xs mt-1 tabular-nums">
               {players.length} {t.team.players}
             </p>
           </div>
         </div>
+        <div className="scoreboard-tile absolute inset-x-0 bottom-0 h-[3px]" aria-hidden />
       </div>
 
       {/* ── Category tabs ─────────────────────────────────── */}
@@ -156,7 +157,7 @@ export default function TeamPage() {
           <Link
             key={cat}
             href={`/clubs/${club.slug}/equipe/${cat.toLowerCase()}`}
-            className={`flex-1 py-3 text-center text-xs sm:text-sm font-semibold transition-colors border-b-2 ${
+            className={`flex-1 py-3 text-center font-display text-xs sm:text-sm font-bold uppercase tracking-wide transition-colors border-b-2 ${
               cat === category
                 ? "border-white text-white"
                 : "border-transparent text-white/50 hover:text-white"

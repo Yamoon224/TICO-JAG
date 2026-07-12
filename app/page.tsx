@@ -71,23 +71,23 @@ export default function HomePage() {
             <Navbar />
 
             {/* ── Hero ────────────────────────────────────────── */}
-            <section className="relative overflow-hidden bg-[#101214] text-white">
+            <section className="relative overflow-hidden bg-[#0C0E11] text-white">
                 <Image
                     src="/images/jag-hero.png"
                     alt="Football guinéen"
                     fill
-                    className="object-cover opacity-25"
+                    className="object-cover opacity-20"
                     priority
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#101214] via-[#101214]/60 to-[#101214]/20" />
-                <div className="relative max-w-5xl mx-auto px-4 sm:px-6 py-24 md:py-36 text-center">
-                    <p className="text-xs font-bold uppercase tracking-[0.2em] mb-5 text-white/50">
+                <div className="absolute inset-0 bg-gradient-to-t from-[#0C0E11] via-[#0C0E11]/70 to-[#0C0E11]/30" />
+                <div className="relative max-w-5xl mx-auto px-4 sm:px-6 py-28 md:py-40 text-center">
+                    <p className="eyebrow text-white/60 mb-5 justify-center flex">
                         {t.home.tagline}
                     </p>
-                    <h1 className="font-display text-4xl sm:text-6xl md:text-7xl font-black text-balance leading-[1.03] tracking-tight mb-6">
+                    <h1 className="font-display text-5xl sm:text-7xl md:text-8xl font-black uppercase text-balance leading-[0.92] tracking-tight mb-7">
                         {t.home.heroTitle}
                     </h1>
-                    <p className="text-base md:text-lg text-white/60 max-w-xl mx-auto leading-relaxed mb-10">
+                    <p className="text-base md:text-lg text-white/55 max-w-xl mx-auto leading-relaxed mb-11">
                         {t.home.heroSub}
                     </p>
                     <div className="flex flex-wrap gap-3 justify-center">
@@ -95,7 +95,7 @@ export default function HomePage() {
                             <Link
                                 key={club.id}
                                 href={`/clubs/${club.id}`}
-                                className="px-6 py-3 rounded-full font-display font-bold text-sm transition-transform hover:scale-105"
+                                className="px-7 py-3.5 font-display font-bold text-sm uppercase tracking-wide transition-transform hover:scale-105"
                                 style={{ backgroundColor: club.couleurPrimaire, color: "#fff" }}
                             >
                                 {club.nom}
@@ -103,15 +103,19 @@ export default function HomePage() {
                         ))}
                     </div>
                 </div>
-                <div className="relative h-2 bg-gradient-to-r from-jag via-white/20 to-atletico" aria-hidden />
+                <div className="relative h-[3px] bg-gradient-to-r from-jag via-white/25 to-atletico" aria-hidden />
             </section>
 
             {/* ── Message du Président ────────────────────────── */}
-            <section className="max-w-6xl mx-auto px-4 sm:px-6 py-14 md:py-20">
-                <h2 className="font-display text-xl md:text-2xl font-black text-foreground text-center mb-10 tracking-tight">
-                    Message du Président
-                </h2>
-                <div className="bg-card border border-border rounded-2xl overflow-hidden flex flex-col md:flex-row gap-0 shadow-sm">
+            <section className="max-w-6xl mx-auto px-4 sm:px-6 py-16 md:py-24">
+                <div className="mb-10">
+                    <p className="eyebrow mb-2">{locale === "fr" ? "Direction" : "Leadership"}</p>
+                    <h2 className="font-display text-2xl md:text-3xl font-black text-foreground uppercase tracking-tight mb-3">
+                        Message du Président
+                    </h2>
+                    <span className="section-rule" style={{ background: "var(--foreground)" }} />
+                </div>
+                <div className="bg-card border border-border flex flex-col md:flex-row gap-0">
                     {/* Photo */}
                     <div className="relative md:w-72 shrink-0 h-64 md:h-auto">
                         <Image
@@ -139,16 +143,20 @@ export default function HomePage() {
             </section>
 
             {/* ── Club cards ──────────────────────────────────── */}
-            <section className="max-w-6xl mx-auto px-4 sm:px-6 py-16 md:py-20">
-                <h2 className="font-display text-xl md:text-2xl font-black text-foreground text-center mb-10 tracking-tight">
-                    {t.home.ourClubs}
-                </h2>
+            <section className="max-w-6xl mx-auto px-4 sm:px-6 py-16 md:py-24">
+                <div className="mb-10">
+                    <p className="eyebrow mb-2">{locale === "fr" ? "Nos institutions" : "Our institutions"}</p>
+                    <h2 className="font-display text-2xl md:text-3xl font-black text-foreground uppercase tracking-tight mb-3">
+                        {t.home.ourClubs}
+                    </h2>
+                    <span className="section-rule" style={{ background: "var(--foreground)" }} />
+                </div>
 
                 <div className="grid sm:grid-cols-2 gap-6">
                     {clubs.map((club) => (
                         <div
                             key={club.id}
-                            className="group bg-card border border-border rounded-2xl overflow-hidden hover:shadow-xl transition-shadow duration-300"
+                            className="group bg-card border border-border hover:border-club/50 hover:shadow-xl transition-all duration-300"
                             style={{ "--club": club.couleurPrimaire } as CSSProperties}
                         >
                             {/* Hero image */}
@@ -170,14 +178,14 @@ export default function HomePage() {
                                         className="rounded-full border-2 border-white object-cover shadow"
                                     />
                                     <div>
-                                        <p className="font-display text-white font-black text-lg leading-tight">{club.acronyme}</p>
+                                        <p className="font-display text-white font-black text-xl uppercase leading-tight">{club.acronyme}</p>
                                         <p className="text-white/60 text-xs">{club.ville}</p>
                                     </div>
                                 </div>
                             </div>
 
                             <div className="p-5 sm:p-6">
-                                <h3 className="font-display font-black text-foreground text-base mb-1.5">{club.nom}</h3>
+                                <h3 className="font-display font-black text-foreground text-lg uppercase mb-1.5">{club.nom}</h3>
                                 <p className="text-muted-foreground text-sm leading-relaxed line-clamp-2 mb-4">
                                     {club.description}
                                 </p>
@@ -185,8 +193,8 @@ export default function HomePage() {
                                 {/* Stats */}
                                 <div className="grid grid-cols-4 gap-1.5 mb-5">
                                     {club.stats.map((s) => (
-                                        <div key={s.label.fr} className="text-center bg-muted rounded-lg py-2 px-1">
-                                            <p className="font-display font-black text-sm text-foreground leading-none mb-1 tabular-nums">{s.value}</p>
+                                        <div key={s.label.fr} className="text-center bg-muted py-2 px-1">
+                                            <p className="font-display font-black text-base text-foreground leading-none mb-1 tabular-nums">{s.value}</p>
                                             <p className="text-[11px] text-muted-foreground truncate">{s.label[locale]}</p>
                                         </div>
                                     ))}
@@ -198,7 +206,7 @@ export default function HomePage() {
                                         <Link
                                             key={cat}
                                             href={`/clubs/${club.id}/equipe/${cat}`}
-                                            className="text-xs font-semibold px-3 py-1.5 rounded-full border border-club/40 text-club hover:bg-club hover:text-white hover:border-club transition-colors"
+                                            className="text-xs font-bold uppercase px-3 py-1.5 border border-club/40 text-club hover:bg-club hover:text-white hover:border-club transition-colors"
                                         >
                                             {t.categories[cat.charAt(0).toUpperCase() + cat.slice(1) as keyof typeof t.categories]}
                                         </Link>
@@ -207,7 +215,7 @@ export default function HomePage() {
 
                                 <Link
                                     href={`/clubs/${club.id}`}
-                                    className="flex items-center justify-center w-full py-3 rounded-full font-display font-bold text-sm transition-opacity hover:opacity-90 text-white bg-club"
+                                    className="flex items-center justify-center w-full py-3 font-display font-bold text-sm uppercase tracking-wide transition-opacity hover:opacity-90 text-white bg-club"
                                 >
                                     {t.home.viewClub} &rarr;
                                 </Link>

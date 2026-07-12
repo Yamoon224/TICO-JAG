@@ -42,7 +42,7 @@ export default function PlayerCard({ player, primaryColor }: Props) {
 
   return (
     <div
-      className="bg-card border border-border rounded-2xl overflow-hidden hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 group"
+      className="bg-card border border-border hover:border-club/50 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 group"
       style={{ "--club": primaryColor } as React.CSSProperties}
     >
       {/* Photo area */}
@@ -59,36 +59,36 @@ export default function PlayerCard({ player, primaryColor }: Props) {
           loading="eager"
           className="relative z-10 h-32 sm:h-36 w-auto object-contain group-hover:scale-105 transition-transform duration-300"
         />
-        {/* Number badge */}
-        <span className="font-display absolute top-2.5 left-2.5 w-7 h-7 rounded-full flex items-center justify-center text-xs font-black text-white shadow bg-club tabular-nums">
+        {/* Number badge — jersey-style square */}
+        <span className="font-display absolute top-0 left-0 w-8 h-8 flex items-center justify-center text-sm font-black text-white bg-club tabular-nums">
           {player.numero}
         </span>
         {/* Position badge */}
-        <span className={`absolute top-2.5 right-2.5 text-[10px] font-bold px-1.5 py-0.5 rounded-md ${posteClass}`}>
+        <span className={`absolute top-2.5 right-2.5 text-[10px] font-bold px-1.5 py-0.5 ${posteClass}`}>
           {player.poste.slice(0, 3).toUpperCase()}
         </span>
       </div>
 
       {/* Info */}
-      <div className="p-3.5">
-        <p className="font-display font-black text-foreground text-sm leading-tight truncate">
-          {player.prenom} <span className="uppercase">{player.nom}</span>
+      <div className="p-3.5 border-t border-border">
+        <p className="font-display font-black text-foreground text-base uppercase leading-tight truncate">
+          {player.prenom} <span>{player.nom}</span>
         </p>
 
         <div className="mt-2.5 grid grid-cols-2 gap-1.5">
-          <div className="bg-muted rounded-lg px-2 py-1.5">
+          <div className="bg-muted px-2 py-1.5">
             <p className="text-muted-foreground text-[10px] leading-none mb-1">Naissance</p>
             <p className="font-semibold text-foreground text-xs leading-none">{formatDate(player.dateNaissance)}</p>
           </div>
-          <div className="bg-muted rounded-lg px-2 py-1.5">
+          <div className="bg-muted px-2 py-1.5">
             <p className="text-muted-foreground text-[10px] leading-none mb-1">Âge</p>
             <p className="font-semibold text-foreground text-xs leading-none tabular-nums">{age} ans</p>
           </div>
-          <div className="bg-muted rounded-lg px-2 py-1.5">
+          <div className="bg-muted px-2 py-1.5">
             <p className="text-muted-foreground text-[10px] leading-none mb-1">Taille</p>
             <p className="font-semibold text-foreground text-xs leading-none">{player.taille}</p>
           </div>
-          <div className="bg-muted rounded-lg px-2 py-1.5">
+          <div className="bg-muted px-2 py-1.5">
             <p className="text-muted-foreground text-[10px] leading-none mb-1">N°</p>
             <p className="font-semibold text-foreground text-xs leading-none tabular-nums">{player.numero}</p>
           </div>

@@ -71,7 +71,7 @@ export default function PhotosPage({ params }: { params: Promise<{ clubId: strin
                 <button
                   key={p.id}
                   onClick={() => setLightboxIdx(i)}
-                  className="group relative aspect-video bg-muted rounded-xl overflow-hidden focus:outline-none focus:ring-2 focus:ring-club"
+                  className="group relative aspect-video bg-muted overflow-hidden focus:outline-none focus:ring-2 focus:ring-club"
                 >
                   <Image src={p.url} alt={p.legende ?? ""} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
                   <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors" />

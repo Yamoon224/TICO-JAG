@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, Barlow } from "next/font/google";
+import { Inter, Barlow_Condensed } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { LocaleProvider } from "@/lib/locale-context";
@@ -10,10 +10,10 @@ const inter = Inter({
     display: "swap",
 });
 
-const barlow = Barlow({
+const barlowCondensed = Barlow_Condensed({
     subsets: ["latin"],
-    weight: ["400", "600", "700", "800", "900"],
-    variable: "--font-barlow",
+    weight: ["500", "600", "700", "800", "900"],
+    variable: "--font-barlow-condensed",
     display: "swap",
 });
 
@@ -35,7 +35,7 @@ export default function RootLayout({
     children: React.ReactNode;
 }) {
     return (
-        <html lang="fr" className={`${inter.variable} ${barlow.variable}`} suppressHydrationWarning>
+        <html lang="fr" className={`${inter.variable} ${barlowCondensed.variable}`} suppressHydrationWarning>
             <body className="font-sans antialiased bg-background text-foreground">
                 <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
                     <LocaleProvider>

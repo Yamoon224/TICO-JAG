@@ -10,10 +10,10 @@ const YEAR = new Date().getFullYear();
 function FooterShell({ children }: { children: React.ReactNode }) {
   const { t } = useLocale();
   return (
-    <footer className="bg-[#101214] text-[#F2F1EE]">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-12 md:py-14">{children}</div>
+    <footer className="bg-[#0C0E11] text-[#F2F1EE]">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-14 md:py-16">{children}</div>
       <div className="border-t border-white/10">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-white/40">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-white/40">
           <p>&copy; {YEAR} Guinée Football Clubs &mdash; {t.footer.rights}</p>
           <p>{t.footer.city}</p>
         </div>
@@ -33,24 +33,22 @@ export function SiteFooter() {
 
   return (
     <FooterShell>
-      <div className="grid gap-10 sm:grid-cols-3">
+      <div className="grid gap-10 sm:grid-cols-[1.1fr_1fr_1fr]">
         <div>
-          <div className="flex items-center gap-2.5 mb-3">
-            <Image src="/images/FGF-Logo.png" alt="FGF" width={32} height={32} className="object-contain" />
-            <p className="font-display font-black text-sm tracking-tight">Guinée Football Clubs</p>
+          <div className="flex items-center gap-2.5 mb-4">
+            <Image src="/images/FGF-Logo.png" alt="FGF" width={34} height={34} className="object-contain" />
+            <p className="font-display font-black text-lg uppercase tracking-tight leading-none">Guinée Football Clubs</p>
           </div>
           <p className="text-sm text-white/50 leading-relaxed max-w-xs">{t.home.heroSub}</p>
         </div>
 
         {clubs.map((club) => (
           <div key={club.id}>
-            <p
-              className="font-display text-xs font-black uppercase tracking-widest mb-3"
-              style={{ color: club.color }}
-            >
+            <span className="font-display text-xs font-black uppercase tracking-widest" style={{ color: club.color }}>
               {club.nom}
-            </p>
-            <ul className="flex flex-col gap-2 text-sm text-white/60">
+            </span>
+            <span className="section-rule mt-2 mb-4" style={{ background: club.color }} />
+            <ul className="flex flex-col gap-2.5 text-sm text-white/60">
               {TEAM_CATEGORIES.map((cat) => (
                 <li key={cat}>
                   <Link href={`/clubs/${club.id}/equipe/${cat}`} className="hover:text-white transition-colors">
@@ -59,7 +57,7 @@ export function SiteFooter() {
                 </li>
               ))}
               <li>
-                <Link href={`/clubs/${club.id}`} className="hover:text-white transition-colors">
+                <Link href={`/clubs/${club.id}`} className="font-semibold text-white/85 hover:text-white transition-colors">
                   {locale === "fr" ? "Voir le club" : "View club"} &rarr;
                 </Link>
               </li>
@@ -71,29 +69,47 @@ export function SiteFooter() {
   );
 }
 
-/** Per-club footer: identity, quick navigation and socials for a single club's pages. */
+/** Per-club footer: identity, dense sitemap and socials for a single club's pages. */
 export function ClubFooter({ club, clubId }: { club: ClubBrand; clubId: string }) {
-  const { t } = useLocale();
+  const { locale, t } = useLocale();
   const menuItems = getClubMenuItems(clubId, t);
   const social = club.social;
 
+  const linkCols: { title: string; links: { label: string; href: string }[] }[] = [
+    {
+      title: locale === "fr" ? "Club" : "Club",
+      links: [
+        { label: locale === "fr" ? "Aperçu" : "Overview", href: `/clubs/${clubId}` },
+        ...menuItems.filter((i) => ["actualites", "palmares", "photos"].some((k) => i.href.endsWith(k))),
+      ],
+    },
+    {
+      title: t.club.ourTeams,
+      links: TEAM_CATEGORIES.map((cat) => ({ label: t.nav[cat], href: `/clubs/${clubId}/equipe/${cat}` })),
+    },
+    {
+      title: locale === "fr" ? "Match & Billetterie" : "Match & Tickets",
+      links: menuItems.filter((i) => ["calendrier", "resultats", "billets", "classement"].some((k) => i.href.endsWith(k))),
+    },
+  ];
+
   return (
     <FooterShell>
-      <div className="grid gap-10 sm:grid-cols-[auto_1fr] sm:gap-14">
-        <div className="flex sm:flex-col items-center sm:items-start gap-3">
+      <div className="grid gap-10 md:grid-cols-[auto_1fr] md:gap-16">
+        <div className="flex sm:flex-col items-center sm:items-start gap-3.5">
           <Image
             src={club.logo}
             alt={club.nom}
-            width={52}
-            height={52}
+            width={56}
+            height={56}
             className="rounded-full border-2 border-white/15 object-cover bg-white/5"
           />
           <div>
-            <p className="font-display font-black text-base leading-tight" style={{ color: club.color }}>
+            <p className="font-display font-black text-xl uppercase tracking-tight leading-tight" style={{ color: club.color }}>
               {club.nom}
             </p>
             {social && (social.facebook || social.youtube) && (
-              <div className="flex items-center gap-3 mt-2">
+              <div className="flex items-center gap-3 mt-2.5">
                 {social.facebook && (
                   <a href={social.facebook} target="_blank" rel="noopener noreferrer" aria-label="Facebook" className="text-white/50 hover:text-white transition-colors">
                     <Facebook size={16} />
@@ -106,14 +122,30 @@ export function ClubFooter({ club, clubId }: { club: ClubBrand; clubId: string }
                 )}
               </div>
             )}
+            <Link
+              href={`/clubs/${clubId}/boutique`}
+              className="inline-flex mt-4 text-xs font-bold uppercase tracking-wide px-4 py-2 text-white transition-opacity hover:opacity-90"
+              style={{ backgroundColor: club.color }}
+            >
+              {t.nav.boutique}
+            </Link>
           </div>
         </div>
 
-        <nav className="grid grid-cols-2 sm:grid-cols-4 gap-x-6 gap-y-2.5 text-sm text-white/60">
-          {menuItems.map((item) => (
-            <Link key={item.href} href={item.href} className="hover:text-white transition-colors">
-              {item.label}
-            </Link>
+        <nav className="grid grid-cols-2 sm:grid-cols-3 gap-x-6 gap-y-8">
+          {linkCols.map((col) => (
+            <div key={col.title}>
+              <p className="text-[11px] font-black uppercase tracking-widest text-white/40 mb-3">{col.title}</p>
+              <ul className="flex flex-col gap-2 text-sm text-white/65">
+                {col.links.map((item) => (
+                  <li key={item.href}>
+                    <Link href={item.href} className="hover:text-white transition-colors">
+                      {item.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
           ))}
         </nav>
       </div>

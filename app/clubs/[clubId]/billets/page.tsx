@@ -56,25 +56,25 @@ export default function BilletsPage({ params }: { params: Promise<{ clubId: stri
           <div className="flex flex-col gap-8">
             {matches.map((m) => (
               <div key={m.matchId}>
-                {/* Match info */}
-                <div className="bg-card border border-border rounded-t-sm px-5 py-4 flex flex-col sm:flex-row sm:items-center gap-3 border-b-0">
+                {/* Match info — punched ticket header */}
+                <div className="ticket-stub bg-card border border-border px-5 py-4 flex flex-col sm:flex-row sm:items-center gap-3">
                   <div className="flex-1 min-w-0">
                     <div className="flex flex-wrap gap-3 text-xs text-muted-foreground mb-1">
                       <span className="flex items-center gap-1"><CalendarDays size={11} />{formatDate(m.date, locale)}</span>
                       <span className="flex items-center gap-1"><MapPin size={11} />{m.stade}</span>
                     </div>
-                    <h2 className="font-display font-black text-foreground text-lg leading-tight">
-                      {club.acronyme} <span className="text-muted-foreground font-normal text-sm mx-1">vs</span> {m.adversaire}
+                    <h2 className="font-display font-black text-foreground text-xl uppercase leading-tight">
+                      {club.acronyme} <span className="text-muted-foreground font-normal text-sm mx-1 normal-case">vs</span> {m.adversaire}
                     </h2>
                     <p className="text-xs text-muted-foreground mt-0.5">{m.competition} &bull; {m.categorie}</p>
                   </div>
-                  <span className="inline-flex items-center gap-1 px-3 py-1 rounded-sm text-xs font-bold border" style={{ color: club.color, borderColor: club.color }}>
+                  <span className="inline-flex items-center gap-1 px-3 py-1 text-xs font-bold border" style={{ color: club.color, borderColor: club.color }}>
                     <Ticket size={11} /> {locale === "fr" ? "Match à domicile" : "Home game"}
                   </span>
                 </div>
 
                 {/* Ticket types */}
-                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-px bg-border border border-border border-t-0 rounded-b-sm overflow-hidden">
+                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-px bg-border border border-border border-t-0">
                   {m.billets.map((b) => {
                     const pct = stockPercent(b.disponible, b.total);
                     const stockColor = pct > 50 ? "#16a34a" : pct > 20 ? "#ca8a04" : "#dc2626";

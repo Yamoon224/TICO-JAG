@@ -61,13 +61,14 @@ export default function ClassementPage({ params }: { params: Promise<{ clubId: s
             {/* Group tabs */}
             {groupes.length > 1 && (
                 <div className="border-b border-border bg-card">
-                    <div className="max-w-5xl mx-auto px-4 sm:px-6 flex gap-1.5 py-2.5 overflow-x-auto">
+                    <div className="max-w-5xl mx-auto px-4 sm:px-6 flex gap-6 overflow-x-auto">
                         {groupes.map((g, i) => (
                             <button key={i} onClick={() => setActiveIdx(i)}
-                                className={`px-4 py-1.5 rounded-full text-sm font-semibold whitespace-nowrap transition-colors ${
-                                    activeIdx === i ? "text-white bg-club" : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                                className={`relative py-3.5 text-sm font-bold uppercase tracking-wide whitespace-nowrap transition-colors ${
+                                    activeIdx === i ? "text-foreground" : "text-muted-foreground hover:text-foreground"
                                 }`}>
                                 {g.categorie}
+                                <span className={`absolute left-0 right-0 -bottom-px h-[3px] bg-club transition-transform origin-left duration-200 ${activeIdx === i ? "scale-x-100" : "scale-x-0"}`} />
                             </button>
                         ))}
                     </div>
@@ -81,13 +82,13 @@ export default function ClassementPage({ params }: { params: Promise<{ clubId: s
 
                 {groupe && (
                     <>
-                        <div className="mb-4 flex flex-wrap gap-2 items-baseline">
-                            <h2 className="font-display font-black text-foreground text-lg">{groupe.competition} — {groupe.categorie}</h2>
+                        <div className="mb-5">
+                            <p className="eyebrow mb-1.5">{groupe.competition} — {groupe.categorie}</p>
                             <span className="text-sm text-muted-foreground">{locale === "fr" ? `Saison ${groupe.saison}` : `Season ${groupe.saison}`}</span>
                         </div>
 
                         {/* Desktop / tablet table */}
-                        <div className="hidden sm:block overflow-x-auto bg-card border border-border rounded-2xl">
+                        <div className="hidden sm:block overflow-x-auto bg-card border border-border">
                             <table className="w-full">
                                 <thead>
                                     <tr className="border-b border-border">
@@ -106,7 +107,7 @@ export default function ClassementPage({ params }: { params: Promise<{ clubId: s
                                 <tbody>
                                     {groupe.entrees.map((e) => (
                                         <tr key={e.position}
-                                            className={`border-b border-border last:border-0 ${e.isClub ? "font-bold bg-club/[0.06]" : ""}`}>
+                                            className={`border-b border-border last:border-0 ${e.isClub ? "font-bold bg-club/[0.06] border-l-2 border-l-club" : ""}`}>
                                             <td className={`${td} pl-4 font-black ${e.isClub ? "text-club" : ""}`}>{e.position}</td>
                                             <td className={`${td} text-left font-semibold text-foreground ${e.isClub ? "text-club" : ""}`}>
                                                 {e.equipe}
@@ -130,7 +131,7 @@ export default function ClassementPage({ params }: { params: Promise<{ clubId: s
                             {groupe.entrees.map((e) => (
                                 <div
                                     key={e.position}
-                                    className={`bg-card border border-border rounded-xl px-3.5 py-3 ${e.isClub ? "border-club bg-club/[0.06]" : ""}`}
+                                    className={`bg-card border border-border px-3.5 py-3 ${e.isClub ? "border-l-2 border-l-club bg-club/[0.06]" : ""}`}
                                 >
                                     <div className="flex items-center gap-3">
                                         <span className={`font-display font-black text-lg w-6 text-center tabular-nums ${e.isClub ? "text-club" : "text-muted-foreground"}`}>

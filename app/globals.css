@@ -4,44 +4,44 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  /* ── Light theme — warm stadium-concrete neutrals ────────── */
-  --background:         #F6F5F1;
-  --foreground:         #14171A;
+  /* ── Light theme — white-dominant editorial, hairlines over shadows ── */
+  --background:         #FFFFFF;
+  --foreground:         #0C0E11;
   --card:               #FFFFFF;
-  --card-foreground:    #14171A;
+  --card-foreground:    #0C0E11;
   --popover:            #FFFFFF;
-  --popover-foreground: #14171A;
-  --primary:            #14171A;
-  --primary-foreground: #F6F5F1;
-  --secondary:          #ECE9E3;
-  --secondary-foreground: #2B2F33;
-  --muted:              #EDEAE4;
+  --popover-foreground: #0C0E11;
+  --primary:            #0C0E11;
+  --primary-foreground: #FFFFFF;
+  --secondary:          #F2F1EE;
+  --secondary-foreground: #17191C;
+  --muted:              #F5F5F3;
   --muted-foreground:   #6B6F73;
-  --accent:             #ECE9E3;
-  --accent-foreground:  #2B2F33;
+  --accent:             #F2F1EE;
+  --accent-foreground:  #17191C;
   --destructive:        #C4291A;
   --destructive-foreground: #FBF7F0;
-  --border:             #E2DFD7;
-  --input:              #E2DFD7;
-  --ring:               #14171A;
-  --radius:             0.75rem;
+  --border:             #E4E3DF;
+  --input:              #E4E3DF;
+  --ring:               #0C0E11;
+  --radius:             0.5rem;
 
   /* club identity (kept for reference; pages inject the live --club/--club-dark) */
   --jag:                #CC0000;
   --jag-dark:            #8F0000;
-  --atletico:           #E8AC00;
-  --atletico-dark:      #A67900;
+  --atletico:           #F5B800;
+  --atletico-dark:      #C9950A;
   --pitch:              #167A42;
   --pitch-dark:         #0E5A2F;
 
   /* chart colors — tied to brand */
   --chart-1: #CC0000;
-  --chart-2: #E8AC00;
+  --chart-2: #F5B800;
   --chart-3: #167A42;
   --chart-4: #2563EB;
   --chart-5: #7C3AED;
 
-  /* sidebar (admin) — deliberately dark regardless of site theme */
+  /* sidebar (admin) — deliberately dark regardless of site theme, untouched by this pass */
   --sidebar:                  #12141A;
   --sidebar-foreground:       #F2F1EE;
   --sidebar-primary:          #167A42;
@@ -93,7 +93,9 @@
 @theme inline {
   --font-sans: var(--font-inter), 'Inter', sans-serif;
   --font-mono: 'Geist Mono', 'Geist Mono Fallback';
-  --font-display: var(--font-barlow), 'Barlow', sans-serif;
+  /* Barlow Condensed — the signature editorial-sports display face: tall, tight, built for
+     shouted headlines and scoreboard numerals. Used with restraint at large sizes only. */
+  --font-display: var(--font-barlow-condensed), 'Barlow Condensed', sans-serif;
 
   --color-background:           var(--background);
   --color-foreground:           var(--foreground);
@@ -131,11 +133,11 @@
   --color-club:                 var(--club, var(--foreground));
   --color-club-dark:            var(--club-dark, var(--foreground));
 
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
-  --radius-2xl: calc(var(--radius) + 10px);
+  --radius-sm: calc(var(--radius) - 2px);
+  --radius-md: var(--radius);
+  --radius-lg: calc(var(--radius) + 4px);
+  --radius-xl: calc(var(--radius) + 8px);
+  --radius-2xl: calc(var(--radius) + 14px);
 
   --color-sidebar:                    var(--sidebar);
   --color-sidebar-foreground:         var(--sidebar-foreground);
@@ -166,18 +168,37 @@
 @layer utilities {
   /* Scoreboard-style numerals & headings — the site's signature type move */
   .font-display {
-    font-family: var(--font-barlow), 'Barlow', sans-serif;
+    font-family: var(--font-barlow-condensed), 'Barlow Condensed', sans-serif;
     letter-spacing: -0.01em;
   }
 
+  /* Eyebrow + rule: the recurring section-heading motif. The eyebrow labels the
+     section; the rule underneath is drawn in the active club color so it doubles
+     as a lightweight brand mark wherever it appears. */
+  .eyebrow {
+    font-family: var(--font-barlow-condensed), 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 0.75rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--club, var(--muted-foreground));
+  }
+  .section-rule {
+    display: block;
+    width: 2.5rem;
+    height: 4px;
+    background: var(--club, var(--foreground));
+    border-radius: 2px;
+  }
+
   /* A physical scoreboard/split-flap tile: near-black tile, perforated top
-     edge, tabular Barlow numerals. Used anywhere real match data (scores,
-     dates, ranks, prices) needs to read like it's lit up on a stadium board. */
+     edge, tabular Barlow Condensed numerals. Used anywhere real match data
+     (scores, dates, ranks, prices) needs to read like it's lit up on a board. */
   .scoreboard-tile {
     position: relative;
-    background: #101214;
+    background: #0C0E11;
     color: #F2F1EE;
-    font-family: var(--font-barlow), 'Barlow', sans-serif;
+    font-family: var(--font-barlow-condensed), 'Barlow Condensed', sans-serif;
     font-variant-numeric: tabular-nums;
   }
   .scoreboard-tile::before {
@@ -210,4 +231,10 @@
   }
   .ticket-stub::before { left: -8px; }
   .ticket-stub::after { right: -8px; }
+
+  /* Signature diagonal cut — used once per page, on the "next match" strip,
+     to give the flat color-blocked band a stadium-banner edge. */
+  .angle-cut-l {
+    clip-path: polygon(18px 0, 100% 0, 100% 100%, 0 100%);
+  }
 }

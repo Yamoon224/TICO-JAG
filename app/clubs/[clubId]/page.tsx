@@ -6,6 +6,7 @@ import Link from "next/link";
 import Image from "next/image";
 import Navbar from "@/components/Navbar";
 import { ClubFooter } from "@/components/Footer";
+import { NextMatchStrip } from "@/components/NextMatchStrip";
 import { fetchClubBySlug, type ClubApiModel } from "@/lib/api";
 import { useLocale } from "@/lib/locale-context";
 
@@ -113,29 +114,32 @@ export default function ClubPage() {
       <Navbar />
 
       {/* ── Hero banner ──────────────────────────────────── */}
-      <section className="relative h-64 sm:h-80 md:h-96 overflow-hidden bg-[#101214]">
-        <Image src={club.hero || "/images/jag-hero.png"} alt={club.name} fill className="object-cover opacity-60" priority />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#101214] via-[#101214]/40 to-[#101214]/10" />
-        <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-4 gap-3.5">
+      <section className="relative h-64 sm:h-80 md:h-96 overflow-hidden bg-[#0C0E11]">
+        <Image src={club.hero || "/images/jag-hero.png"} alt={club.name} fill className="object-cover opacity-55" priority />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#0C0E11] via-[#0C0E11]/45 to-[#0C0E11]/10" />
+        <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-4 gap-4">
           <Image
             src={club.logo || "/images/jag-logo.png"}
             alt={club.name}
-            width={76}
-            height={76}
+            width={84}
+            height={84}
             className="rounded-full border-4 shadow-xl object-cover bg-white/10"
             style={{ borderColor: "var(--club)" }}
           />
-          <h1 className="font-display text-white font-black text-3xl sm:text-4xl md:text-5xl text-balance leading-[1.05] tracking-tight">
+          <h1 className="font-display text-white font-black text-4xl sm:text-5xl md:text-6xl uppercase text-balance leading-[0.95] tracking-tight">
             {club.name}
           </h1>
-          <p className="text-white/55 text-sm">
+          <p className="text-white/55 text-xs uppercase tracking-wide font-bold">
             {t.club.founded} {formatFoundedDate(club.founded_at)} &mdash; {club.city || "-"}
           </p>
         </div>
+        <div className="scoreboard-tile absolute inset-x-0 bottom-0 h-[3px]" aria-hidden />
       </section>
 
+      <NextMatchStrip clubId={club.slug} club={{ nom: club.name, acronyme: club.acronym ?? club.name, logo: club.logo || "/images/jag-logo.png", hero: club.hero || "/images/jag-hero.png", color: club.primary_color || "#CC0000", colorDark: club.secondary_color || "#8F0000" }} />
+
       {/* ── Scoreboard stats strip ──────────────────────────── */}
-      <div className="scoreboard-tile grid grid-cols-2 sm:grid-cols-4 max-w-5xl mx-auto sm:rounded-b-2xl overflow-hidden">
+      <div className="scoreboard-tile grid grid-cols-2 sm:grid-cols-4 max-w-6xl mx-auto overflow-hidden">
         {[
           { label: "Cadets", value: String(teamCount.Cadets) },
           { label: "Juniors", value: String(teamCount.Juniors) },
@@ -149,23 +153,21 @@ export default function ClubPage() {
         ))}
       </div>
 
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 py-14 md:py-18">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-16 md:py-20">
 
         {/* ── About ────────────────────────────────────────── */}
-        <section className="mb-14">
-          <h2 className="font-display text-lg md:text-xl font-black text-foreground mb-3 tracking-tight">
-            {t.club.about}
-          </h2>
-          <p className="text-muted-foreground leading-relaxed text-sm md:text-base">
+        <section className="mb-16">
+          <p className="eyebrow mb-2">{t.club.about}</p>
+          <span className="section-rule mb-4" />
+          <p className="text-muted-foreground leading-relaxed text-sm md:text-base max-w-2xl">
             {(locale === "en" ? club.description_en : club.description) || club.description || "Aucune description disponible pour ce club."}
           </p>
         </section>
 
         {/* ── Teams grid ───────────────────────────────────── */}
         <section>
-          <h2 className="font-display text-lg md:text-xl font-black text-foreground mb-5 tracking-tight">
-            {t.club.ourTeams}
-          </h2>
+          <p className="eyebrow mb-2">{t.club.ourTeams}</p>
+          <span className="section-rule mb-6" />
           <div className="grid sm:grid-cols-3 gap-4">
             {CATEGORIES.map((cat) => {
               const playersCount = teamCount[cat];
@@ -173,18 +175,18 @@ export default function ClubPage() {
                 <Link
                   key={cat}
                   href={`/clubs/${club.slug}/equipe/${cat.toLowerCase()}`}
-                  className="group block bg-card border border-border rounded-2xl p-5 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200"
+                  className="group block bg-card border border-border p-5 hover:border-club/50 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200"
                 >
-                  <div className="w-11 h-11 rounded-xl flex items-center justify-center mb-4 font-display font-black text-base text-white bg-club">
+                  <div className="w-11 h-11 flex items-center justify-center mb-4 font-display font-black text-base text-white bg-club">
                     {cat[0]}
                   </div>
-                  <h3 className="font-display font-black text-foreground text-base mb-1">
+                  <h3 className="font-display font-black text-foreground text-lg uppercase mb-1">
                     {t.categories[cat]}
                   </h3>
                   <p className="text-muted-foreground text-sm mb-4 tabular-nums">
                     {playersCount} {t.club.players}
                   </p>
-                  <span className="text-xs font-semibold text-club group-hover:underline">
+                  <span className="text-xs font-bold uppercase text-club group-hover:underline">
                     {t.club.viewTeam} &rarr;
                   </span>
                 </Link>
